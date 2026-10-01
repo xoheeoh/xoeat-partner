@@ -1,0 +1,41 @@
+{
+  "expo": {
+    "name": "Xoeat 사장님",
+    "slug": "xoeat-partner",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "icon": "./assets/images/icon.png",
+    "scheme": "xoeat-partner",
+    "userInterfaceStyle": "light",
+    "newArchEnabled": true,
+    "ios": {
+      "bundleIdentifier": "app.xoeat.partner",
+      "supportsTablet": true,
+      "infoPlist": {
+        "NSPhotoLibraryUsageDescription": "메뉴 사진을 등록하기 위해 사진 보관함을 사용합니다.",
+        "NSCameraUsageDescription": "메뉴 사진을 촬영해 등록하기 위해 카메라를 사용합니다."
+      }
+    },
+    "android": {
+      "package": "app.xoeat.partner",
+      "adaptiveIcon": {
+        "backgroundColor": "#F0501E",
+        "foregroundImage": "./assets/images/android-icon-foreground.png"
+      },
+      "predictiveBackGestureEnabled": false
+    },
+    "web": {
+      "name": "Xoeat 사장님 | 주문은 바로, 메뉴는 간단히.",
+      "output": "single",
+      "favicon": "./assets/images/favicon.png",
+      "bundler": "metro"
+    },
+    "plugins": [
+      "expo-secure-store",
+      "expo-font",
+      "expo-audio",
+      ["expo-image-picker", { "photosPermission": "메뉴 사진을 등록하기 위해 사진 보관함을 사용합니다." }],
+      ["expo-splash-screen", { "backgroundColor": "#F0501E", "image": "./assets/images/splash-icon.png", "imageWidth": 96 }]
+    ]
+  }
+}
