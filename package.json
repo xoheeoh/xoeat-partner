@@ -1,0 +1,27 @@
+{
+  "name": "xoeat-partner",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "login": "supabase login",
+    "link": "supabase link",
+    "db:push": "supabase db push --include-seed",
+    "config:push": "supabase config push",
+    "seed:demo": "node scripts/seed-demo.mjs",
+    "db:start": "supabase start",
+    "db:stop": "supabase stop",
+    "db:status": "supabase status",
+    "db:reset": "supabase db reset",
+    "db:test": "./scripts/verify.sh",
+    "app": "npm --prefix apps/mobile run",
+    "app:web": "npm --prefix apps/mobile run web",
+    "app:typecheck": "npx --prefix apps/mobile tsc --noEmit -p apps/mobile/tsconfig.json"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.58.0",
+    "ws": "^8.21.3"
+  },
+  "devDependencies": {
+    "supabase": "^2.117.0"
+  }
+}
