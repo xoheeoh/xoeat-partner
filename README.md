@@ -13,6 +13,9 @@
 
 <!-- 배포 후 채우기: 웹 데모 URL -->
 
+구매자 앱 [xoeat-customer](https://github.com/xoheeoh/xoeat-customer) 와 **같은 Supabase 프로젝트**를 씁니다.
+구매자 앱에서 주문하면 이 앱의 접수대기에 알림음과 함께 뜨고, 여기서 수락·조리·배달 처리를 하면 구매자 앱의 주문 상태가 실시간으로 바뀝니다.
+
 ## 데모 계정
 
 | 아이디 | 비밀번호 | 가게 |
@@ -21,9 +24,10 @@
 | `owner02` | `demo1234!` | 망원 소반 — 다른 사람이 `owner01` 을 쓰고 있을 때 |
 
 두 가게 모두 메뉴 12개 · 옵션 그룹 4개 · 지난 30일 주문 이력 · 오늘 진행중 주문이 들어 있습니다.
+그 외 가게 4곳(`owner03`~`owner06`, 치킨·피자·카페·분식)은 구매자 앱의 가게 목록을 채우기 위한 것이고 같은 비밀번호로 로그인됩니다.
 가맹점 계정은 플랫폼이 발급하는 것이라 회원가입 화면은 없습니다. 데모 데이터는 예고 없이 초기화될 수 있습니다.
 
-> 이 데모에는 고객 앱이 없습니다. 홈 화면의 **"데모 주문 받기"** 버튼이 고객 주문을 대신 넣어 주고,
+> 구매자 앱을 띄우지 않고도 시연할 수 있게 홈 화면에 **"데모 주문 받기"** 버튼을 두었습니다. 가짜 고객 주문을 1건 넣어 주고,
 > 실제 서비스처럼 Realtime 으로 알림음과 함께 접수대기 목록에 나타납니다.
 
 ---
@@ -59,8 +63,8 @@ xoeat-partner/
     src/styles/                 디자인 토큰 — 색(시맨틱 + 스케일) · radius · space · shadow
   docs/api-spec.md              앱이 연동 기준으로 삼은 API 명세 (상태 전이 규칙 포함)
   docs/screenshots/             README 용 화면
-  supabase/                     데모용 API 서버 (아래 "범위" 참고)
-  scripts/                      데모 계정 시드 · 서버 시나리오 테스트
+  supabase/                     데모용 API 서버 — 사장님·구매자 앱 공용 (아래 "범위" 참고)
+  scripts/                      데모 계정 시드(사장님 6 · 회원 2) · 서버 시나리오 테스트 64건
 ```
 
 ### 기술 선택
@@ -107,7 +111,7 @@ xoeat-partner/
 
 **데모 범위 밖으로 둔 것.** 실제 가맹점 앱에는 있지만 이 데모에서는 만들지 않았습니다.
 
-- 고객 앱 — 주문은 "데모 주문 받기" 버튼이 대신 만듭니다.
+- 고객 앱은 별도 저장소([xoeat-customer](https://github.com/xoheeoh/xoeat-customer))에 있습니다. 없이도 "데모 주문 받기" 버튼으로 시연할 수 있습니다.
 - 푸시 알림 — 앱이 켜져 있을 때의 Realtime 알림만 있습니다. 백그라운드 푸시(FCM/APNs)는 서버 트리거와 Expo Push 로 붙일 수 있는 자리만 두었습니다.
 - 결제 취소·환불 처리 — 거절·취소 시 "환불됩니다" 안내만 하고, 실제 PG 연동은 없습니다.
 - 세금계산서, 결제 내역(PG 승인 단위), 리뷰 답글, 1:1 문의 — 도메인 난이도보다 화면 수만 늘리는 항목이라 제외했습니다.
@@ -125,8 +129,8 @@ npm install
 npm run login
 npm run link -- --project-ref <ref>
 npm run db:push                 # 스키마 + RLS + 함수 + 공지 시드
-npm run config:push             # 회원가입 비활성 등 auth 설정
-SUPABASE_URL=https://<ref>.supabase.co SUPABASE_SERVICE_ROLE_KEY=<service_role> npm run seed:demo
+npm run config:push             # auth 설정 (구매자 회원가입 허용, 이메일 확인 없음)
+SUPABASE_URL=https://<ref>.supabase.co SUPABASE_SERVICE_ROLE_KEY=<service_role> npm run seed:demo   # 가게 6곳 + 회원 2명
 
 # 2. 앱
 cd apps/mobile
@@ -140,7 +144,7 @@ npm run web                     # 또는 npm run ios / npm run android
 
 ```bash
 npm run db:start                # Docker Desktop 필요
-npm run db:test                 # 마이그레이션 + 시드 + 서버 시나리오 테스트 37건
+npm run db:test                 # 마이그레이션 + 시드 + 서버 시나리오 테스트 64건
 SUPABASE_URL=http://127.0.0.1:54321 SUPABASE_SERVICE_ROLE_KEY=<db:status 의 service_role key> npm run seed:demo
 ```
 

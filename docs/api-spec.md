@@ -187,3 +187,63 @@ Realtime 페이로드에는 `order_items` 가 없으므로 상세는 다시 조�
 ### 데모 전용
 
 - `createDemoOrder(type?)` — RPC `demo_create_order`. 고객 앱 대신 판매중 메뉴로 가짜 주문 1건을 만든다. 영업 일시중지 중에는 `STORE_PAUSED`, 1분 10건 초과는 `TOO_MANY_REQUESTS`.
+
+---
+
+## 4. 구매자 (xoeat-customer 앱)
+
+같은 Supabase 프로젝트를 쓴다. 구매자는 `customers.id = auth.uid()` 로 식별되고 (`is_customer()`),
+가게·메뉴는 읽기만, 주문은 `place_order()` 로만 만든다. 사장님 앱의 계약은 그대로다.
+
+### 인증
+
+- 로그인 이메일은 `${loginId}@customer.xoeat.app` (사장님은 `@demo.xoeat.app`). 도메인이 달라 같은 아이디가 공존한다.
+- 회원가입: `auth.signUp` 의 `user_metadata = { role: 'customer', login_id, name, phone }`. 트리거 `handle_new_customer` 가 `customers` 행을 만든다.
+
+### 조회 (`catalogApi`)
+
+- `getStores()` / `getStore(id)` — 모든 가게 + `store_hours`. 앱이 영업시간·`status` 로 `isOpenNow` 를 계산한다.
+- `getStoreMenus(storeId)` / `getMenu(id)` — 메뉴 + 카테고리 + 연결된 옵션 그룹·옵션. `HIDDEN` 메뉴는 RLS 가 제외한다.
+
+### 회원 데이터 (`customerApi`) — 테이블 직접 CRUD + RLS
+
+| 테이블 | 비고 |
+| --- | --- |
+| `customers` | 본인 행만 조회, `name`·`phone` 만 수정 |
+| `addresses` | `label`, `road_address`, `detail`, `is_default`. 기본은 회원당 1개 (부분 유니크 인덱스). 기본 지정은 RPC `set_default_address` |
+| `payment_methods` | `brand`, `last4`(4자리), `expiry`(MM/YY), `alias`. 카드번호 전체는 서버에 오지 않는다. 기본 지정은 RPC `set_default_payment_method` |
+| `favorites` | `(customer_id, store_id)` |
+
+### 주문 (`orderApi`)
+
+#### `placeOrder({ cart, orderType, addressId, paymentMethodId, requestMemo })` → `{ order }`
+
+RPC `place_order(p_store_id, p_order_type, p_items, p_address_id, p_payment_method_id, p_request_memo)`.
+`p_items = [{ menuId, quantity, optionIds[] }]`. 서버가 검사·계산하는 것:
+
+| 검사 | 오류 코드 |
+| --- | --- |
+| 구매자 계정인지 | `NOT_A_CUSTOMER` |
+| 가게 영업 일시중지 아님 | `STORE_PAUSED` |
+| 주문 방식이 가게에서 켜져 있음 | `DELIVERY_NOT_AVAILABLE` · `PICKUP_NOT_AVAILABLE` |
+| 배달이면 본인 배송지 | `ADDRESS_REQUIRED` |
+| 본인 결제수단 | `PAYMENT_METHOD_REQUIRED` |
+| 항목 1개 이상, 수량 1~99 | `CART_EMPTY` · `INVALID_QUANTITY` |
+| 메뉴가 그 가게 것이고 판매중 | `MENU_NOT_FOUND` · `MENU_SOLD_OUT` |
+| 옵션이 그 메뉴에 연결된 그룹의 것이고 품절 아님 | `INVALID_OPTION` |
+| 그룹별 선택 수 (필수 min~max, 선택 0~max) | `OPTION_REQUIRED` · `OPTION_TOO_MANY` |
+| 배달이면 최소 주문금액 | `MIN_ORDER_AMOUNT` |
+
+금액은 서버가 `menus.price + 옵션가` 로 다시 계산한다. 주문은 `status = PENDING`, `customer_id`, `card_label`('신한카드 ****1234'),
+배송지 스냅샷(`address`, `address_detail`)과 함께 만들어지고 사장님 앱에 Realtime INSERT 로 전달된다.
+
+#### `cancelMyOrder(orderId)` — RPC `cancel_my_order`. `PENDING` 일 때만. 그 외 `INVALID_TRANSITION`.
+
+#### `getMyOrders()` / `getOrder(id)` — `customer_id = auth.uid()` 인 주문만 (RLS). `stores(name)` 과 `order_items` 포함.
+
+#### `subscribeMyOrders(cb)` — `orders` UPDATE 구독. 사장님이 수락·진행·거절하면 `(orderId, status)` 가 온다.
+
+### 데모 (서비스 롤)
+
+- `demo_bootstrap_store(user, login, name, category, intro, address, minOrder, fee, minutes, menus jsonb)` — 메뉴 JSON 으로 가게 생성 (owner03~06)
+- `demo_bootstrap_customer(user)` — 배송지 2 · 카드 2 · 찜 2 · 지난 주문 6 · 진행중 주문 1

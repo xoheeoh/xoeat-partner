@@ -141,6 +141,116 @@ end $$;
 
 reset role;
 
+-- ── 3. 구매자 (회원) ──────────────────────────────────────────────────
+-- 추가 가게 1곳 + 회원 1명. 회원은 auth.users 의 metadata 로 트리거가 customers 행을 만든다.
+insert into auth.users (id, email) values ('aaaaaaaa-0000-0000-0000-000000000003', 't-owner03@demo.xoeat.app');
+select public.demo_bootstrap_store('aaaaaaaa-0000-0000-0000-000000000003', 't-owner03', '테스트 치킨', 'CHICKEN', '소개', '주소', 15000, 2500, 35,
+  '[{"category":"치킨","items":[{"name":"후라이드","price":19000},{"name":"양념","price":20000}]},{"category":"음료","items":[{"name":"콜라","price":3000}]}]'::jsonb);
+insert into auth.users (id, email, raw_user_meta_data) values
+  ('bbbbbbbb-0000-0000-0000-000000000001', 't-user01@customer.xoeat.app', '{"role":"customer","login_id":"t-user01","name":"테스트회원","phone":"010-0000-0000"}');
+
+set role authenticated;
+select set_config('request.jwt.claim.sub', 'bbbbbbbb-0000-0000-0000-000000000001', true);
+
+do $$
+declare
+  v_store  uuid;
+  v_menu   uuid;
+  v_menu2  uuid;
+  v_grp_req uuid;
+  v_opt_req uuid;
+  v_opt_opt uuid;
+  v_addr   uuid;
+  v_pm     uuid;
+  o        public.orders;
+  o2       public.orders;
+begin
+  perform pg_temp.check('가입 트리거가 customers 행을 만든다', (select count(*) from public.customers) = 1);
+  perform pg_temp.check('회원은 사장님 가게가 없다 (my_store_id null)', public.my_store_id() is null);
+  perform pg_temp.check('회원은 모든 가게를 본다', (select count(*) from public.stores) = 3);
+  perform pg_temp.check('회원은 숨김 메뉴를 못 본다', (select count(*) from public.menus where sale_status = 'HIDDEN') = 0
+                                                   and (select count(*) from public.menus) > 0);
+  perform pg_temp.check('회원은 남의 주문을 못 본다 (아직 0건)', (select count(*) from public.orders) = 0);
+
+  -- 배송지·결제수단 등록
+  insert into public.addresses (customer_id, label, road_address, detail, is_default)
+  values ('bbbbbbbb-0000-0000-0000-000000000001', '집', '서울 마포구 연남로 12', '101호', true) returning id into v_addr;
+  insert into public.payment_methods (customer_id, brand, last4, expiry, is_default)
+  values ('bbbbbbbb-0000-0000-0000-000000000001', '신한', '1234', '12/28', true) returning id into v_pm;
+  perform pg_temp.expect_error('카드 끝 4자리 형식 검사', $q$insert into public.payment_methods (customer_id, brand, last4, expiry) values ('bbbbbbbb-0000-0000-0000-000000000001', '신한', '12', '12/28')$q$, 'new row for relation "payment_methods" violates check constraint "payment_methods_last4_check"');
+  perform pg_temp.expect_error('남의 명의로 배송지 등록 불가', $q$insert into public.addresses (customer_id, road_address) values ('aaaaaaaa-0000-0000-0000-000000000001', '서울')$q$, 'new row violates row-level security policy for table "addresses"');
+
+  -- 연남 소반(t-owner01)의 김치찌개: 필수 그룹(맵기·양) + 선택 그룹
+  select s.id into v_store from public.stores s where s.login_id = 't-owner01';
+  select m.id into v_menu from public.menus m where m.store_id = v_store and m.name = '소반 김치찌개';
+  select m.id into v_menu2 from public.menus m where m.store_id = v_store and m.name = '계란말이';
+  select g.id into v_grp_req from public.option_groups g where g.store_id = v_store and g.name = '맵기 선택';
+  select op.id into v_opt_req from public.options op where op.group_id = v_grp_req and op.name = '보통맛';
+  select op.id into v_opt_opt from public.options op join public.option_groups g on g.id = op.group_id
+   where g.store_id = v_store and op.name = '치즈';
+
+  -- 검증 실패 케이스들
+  perform pg_temp.expect_error('필수 옵션 누락', format('select public.place_order(%L, %L, %L, %L, %L)', v_store, 'DELIVERY',
+    jsonb_build_array(jsonb_build_object('menuId', v_menu, 'quantity', 1, 'optionIds', '[]'::jsonb)), v_addr, v_pm), 'OPTION_REQUIRED');
+  perform pg_temp.expect_error('결제수단 없음', format('select public.place_order(%L, %L, %L, %L, null)', v_store, 'PICKUP',
+    jsonb_build_array(jsonb_build_object('menuId', v_menu2, 'quantity', 1)), v_addr), 'PAYMENT_METHOD_REQUIRED');
+  perform pg_temp.expect_error('배달인데 배송지 없음', format('select public.place_order(%L, %L, %L, null, %L)', v_store, 'DELIVERY',
+    jsonb_build_array(jsonb_build_object('menuId', v_menu2, 'quantity', 1)), v_pm), 'ADDRESS_REQUIRED');
+  perform pg_temp.expect_error('최소 주문금액 미달 (배달)', format('select public.place_order(%L, %L, %L, %L, %L)', v_store, 'DELIVERY',
+    jsonb_build_array(jsonb_build_object('menuId', v_menu2, 'quantity', 1)), v_addr, v_pm), 'MIN_ORDER_AMOUNT');
+  perform pg_temp.expect_error('빈 장바구니', format('select public.place_order(%L, %L, %L, %L, %L)', v_store, 'PICKUP', '[]'::jsonb, v_addr, v_pm), 'CART_EMPTY');
+
+  -- 정상 주문: 김치찌개(보통맛·보통) ×2 + 치즈 토핑, 계란말이 ×1 → (9500+1500)*2 + 6000 = 28000 + 배달비 3000
+  o := public.place_order(v_store, 'DELIVERY',
+    jsonb_build_array(
+      jsonb_build_object('menuId', v_menu, 'quantity', 2, 'optionIds', jsonb_build_array(v_opt_req, v_opt_opt,
+        (select op.id from public.options op join public.option_groups g on g.id = op.group_id where g.store_id = v_store and op.name = '보통'))),
+      jsonb_build_object('menuId', v_menu2, 'quantity', 1)),
+    v_addr, v_pm, '문 앞에 놓아주세요');
+  perform pg_temp.check('주문 생성: 접수대기', o.status = 'PENDING' and o.customer_id = 'bbbbbbbb-0000-0000-0000-000000000001');
+  perform pg_temp.check('주문 생성: 서버가 금액을 계산한다', o.items_amount = 28000 and o.delivery_fee = 3000 and o.total_amount = 31000);
+  perform pg_temp.check('주문 생성: 배송지·카드 라벨 스냅샷', o.address = '서울 마포구 연남로 12' and o.card_label = '신한카드 ****1234');
+  perform pg_temp.check('주문 생성: 항목 2건, 옵션 이름 저장', (select count(*) from public.order_items where order_id = o.id) = 2
+                        and (select options::text from public.order_items where order_id = o.id and menu_name = '소반 김치찌개') like '%치즈%');
+  perform pg_temp.check('회원은 자기 주문을 본다', (select count(*) from public.orders) = 1);
+
+  -- 구매자 취소 (접수대기만)
+  o2 := public.cancel_my_order(o.id);
+  perform pg_temp.check('접수대기 주문 구매자 취소', o2.status = 'CANCELED' and o2.reject_reason = '고객 요청');
+  perform pg_temp.expect_error('취소된 주문 재취소 불가', format('select public.cancel_my_order(%L)', o.id), 'INVALID_TRANSITION');
+  perform pg_temp.expect_error('회원은 사장님 RPC 를 못 쓴다 (주문 없음)', format('select public.accept_order(%L, 10)', o.id), 'ORDER_NOT_FOUND');
+
+  -- 포장 주문 → 사장님 쪽에서 보이는지 (다음 섹션)
+  o := public.place_order(v_store, 'PICKUP', jsonb_build_array(jsonb_build_object('menuId', v_menu2, 'quantity', 2)), null, v_pm);
+  perform pg_temp.check('포장 주문: 배달비 0, 최소주문 미적용', o.delivery_fee = 0 and o.total_amount = 12000);
+
+  -- 찜
+  insert into public.favorites (customer_id, store_id) values ('bbbbbbbb-0000-0000-0000-000000000001', v_store);
+  perform pg_temp.check('찜 등록', (select count(*) from public.favorites) = 1);
+
+  -- 기본 결제수단 교체
+  insert into public.payment_methods (customer_id, brand, last4, expiry) values ('bbbbbbbb-0000-0000-0000-000000000001', '현대', '5678', '03/27');
+  perform public.set_default_payment_method((select id from public.payment_methods where last4 = '5678'));
+  perform pg_temp.check('기본 결제수단은 하나만', (select count(*) from public.payment_methods where is_default) = 1
+                        and (select last4 from public.payment_methods where is_default) = '5678');
+end $$;
+
+-- ── 4. 사장님 1 이 구매자 주문을 보고 수락한다 ──────────────────────
+select set_config('request.jwt.claim.sub', 'aaaaaaaa-0000-0000-0000-000000000001', true);
+do $$
+declare
+  o public.orders;
+begin
+  select * into o from public.orders where customer_id = 'bbbbbbbb-0000-0000-0000-000000000001' and status = 'PENDING' limit 1;
+  perform pg_temp.check('사장님: 구매자 주문이 접수대기에 보인다', o.id is not null and o.order_type = 'PICKUP');
+  perform pg_temp.check('사장님: 회원 테이블은 보이지 않는다', (select count(*) from public.customers) = 0);
+  perform pg_temp.check('사장님: 다른 가게 메뉴는 여전히 안 보인다', (select count(distinct store_id) from public.menus) = 1);
+  o := public.accept_order(o.id);
+  perform pg_temp.check('사장님: 구매자 포장 주문 수락', o.status = 'ACCEPTED');
+end $$;
+
+reset role;
+
 -- ── 결과 ─────────────────────────────────────────────────────────────
 select no, case when ok then 'PASS' else 'FAIL' end as result, name from t_result order by no;
 select count(*) filter (where ok) as passed, count(*) filter (where not ok) as failed from t_result;
