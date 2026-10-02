@@ -63,7 +63,7 @@ const LoginScreen: React.FC<Props> = ({ navigation }) => {
             Xoeat 사장님
           </Typography>
           <Typography mode="body2" color="gray500">
-            주문은 바로, 메뉴는 간단히.
+            주문은 빠르게, 가게 운영은 편하게.
           </Typography>
         </View>
 

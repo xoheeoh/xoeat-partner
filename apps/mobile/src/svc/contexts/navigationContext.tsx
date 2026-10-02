@@ -6,7 +6,7 @@ import { NavigationContainer, NavigationContainerRef } from '@react-navigation/n
 export const navigationRef = React.createRef<NavigationContainerRef<RootStackParamList>>();
 
 // 웹 브라우저 탭 제목. 기본값은 화면 이름으로 바뀌므로 하나로 고정한다. 네이티브에서는 무시된다.
-export const WEB_DOCUMENT_TITLE = 'Xoeat 사장님 | 주문은 바로, 메뉴는 간단히.';
+export const WEB_DOCUMENT_TITLE = 'Xoeat 사장님 | 주문은 빠르게, 가게 운영은 편하게.';
 
 // Provider 설정
 export const NavigationProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
