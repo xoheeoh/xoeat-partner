@@ -35,7 +35,38 @@ const monthDaysOf = (summary: DashboardSummary): DailySales[] => {
   return (summary.week ?? []).filter((d) => new Date(`${d.date}T00:00:00`).getMonth() === month);
 };
 
-/** 홈: 영업 상태, 오늘 주문 현황, 오늘·이번 달 매출(주 단위 추이), 바로가기, 데모 주문 버튼 */
+/** 홈 상단 "지금 할 일" 카드. hot 이면 브랜드색으로 채워 눈에 띄게 한다 */
+const TodoCard: React.FC<{ icon: IconName; label: string; count: number; hint: string; hot?: boolean; onPress: () => void }> = ({
+  icon,
+  label,
+  count,
+  hint,
+  hot = false,
+  onPress,
+}) => (
+  <Pressable style={({ pressed }) => [styles.stat, hot && styles.statHot, pressed && styles.statPressed]} onPress={onPress}>
+    <View style={styles.statHead}>
+      <View style={[styles.statIcon, hot && styles.statIconHot]}>
+        <MaterialCommunityIcons name={icon} size={18} color={hot ? theme.colors.white : theme.colors.orange600} />
+      </View>
+      <MaterialCommunityIcons name="chevron-right" size={18} color={hot ? 'rgba(255,255,255,0.7)' : theme.colors.gray300} />
+    </View>
+    <Typography mode="caption1" color={hot ? 'white' : 'gray500'}>
+      {label}
+    </Typography>
+    <Typography mode="heading1" color={hot ? 'white' : 'gray900'}>
+      {count}
+      <Typography mode="subtitle3" color={hot ? 'white' : 'gray500'}>
+        {' '}건
+      </Typography>
+    </Typography>
+    <Typography mode="caption2" color={hot ? 'white' : 'gray400'} numberOfLines={1}>
+      {hint}
+    </Typography>
+  </Pressable>
+);
+
+/** 홈: 영업 상태, 지금 할 일(접수대기·진행중), 오늘·이번 달 매출(주 단위 추이), 바로가기, 데모 주문 버튼 */
 const HomeScreen = () => {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const { store, setStatus, refresh } = useStore();
@@ -143,42 +174,23 @@ const HomeScreen = () => {
         )}
 
         {/* 오늘 주문 현황 */}
+        {/* 지금 할 일: 접수대기(수락 필요) · 진행중(조리·배달). 완료 건수는 행동이 필요 없어 홈에서는 매출 옆에만 작게 둔다 */}
         <View style={styles.statsRow}>
-          <Pressable
-            style={[styles.stat, counts.PENDING > 0 && styles.statHot]}
-            onPress={() => navigation.navigate('Main', { screen: 'Orders', params: { tab: 'PENDING' } })}>
-            <Typography mode="caption1" color={counts.PENDING > 0 ? 'white' : 'gray500'}>
-              접수대기
-            </Typography>
-            <Typography mode="heading2" color={counts.PENDING > 0 ? 'white' : 'gray900'}>
-              {counts.PENDING}
-              <Typography mode="subtitle3" color={counts.PENDING > 0 ? 'white' : 'gray500'}>
-                {' '}건
-              </Typography>
-            </Typography>
-          </Pressable>
-          <Pressable style={styles.stat} onPress={() => navigation.navigate('Main', { screen: 'Orders', params: { tab: 'ING' } })}>
-            <Typography mode="caption1" color="gray500">
-              진행중
-            </Typography>
-            <Typography mode="heading2" color="gray900">
-              {counts.ING}
-              <Typography mode="subtitle3" color="gray500">
-                {' '}건
-              </Typography>
-            </Typography>
-          </Pressable>
-          <Pressable style={styles.stat} onPress={() => navigation.navigate('Main', { screen: 'Orders', params: { tab: 'COMPLETED' } })}>
-            <Typography mode="caption1" color="gray500">
-              완료
-            </Typography>
-            <Typography mode="heading2" color="gray900">
-              {counts.COMPLETED}
-              <Typography mode="subtitle3" color="gray500">
-                {' '}건
-              </Typography>
-            </Typography>
-          </Pressable>
+          <TodoCard
+            icon="bell-ring-outline"
+            label="접수대기"
+            count={counts.PENDING}
+            hint={counts.PENDING > 0 ? '수락이 필요해요' : '새 주문이 없어요'}
+            hot={counts.PENDING > 0}
+            onPress={() => navigation.navigate('Main', { screen: 'Orders', params: { tab: 'PENDING' } })}
+          />
+          <TodoCard
+            icon="chef-hat"
+            label="진행중"
+            count={counts.ING}
+            hint={counts.ING > 0 ? '조리·배달 중이에요' : '진행중인 주문이 없어요'}
+            onPress={() => navigation.navigate('Main', { screen: 'Orders', params: { tab: 'ING' } })}
+          />
         </View>
 
         {/* 매출 */}
@@ -196,14 +208,19 @@ const HomeScreen = () => {
           </View>
           {summary ? (
             <>
-              {/* 오늘: 금액만 크게 */}
+              {/* 오늘: 금액 크게 + 완료 건수 작게 */}
               <View>
                 <Typography mode="caption1" color="gray500">
                   오늘
                 </Typography>
-                <Typography mode="heading2" color="orange600">
-                  {won(summary.today.sales)}
-                </Typography>
+                <View style={styles.monthAmountRow}>
+                  <Typography mode="heading2" color="orange600">
+                    {won(summary.today.sales)}
+                  </Typography>
+                  <Typography mode="caption1" color="gray500">
+                    완료 {counts.COMPLETED}건
+                  </Typography>
+                </View>
               </View>
 
               <View style={styles.divider} />
@@ -289,7 +306,11 @@ const styles = StyleSheet.create({
   pauseLink: { flexDirection: 'row', alignItems: 'center', gap: 6, alignSelf: 'flex-start' },
   statsRow: { flexDirection: 'row', gap: 10 },
   stat: { flex: 1, backgroundColor: theme.colors.white, borderRadius: theme.radius.lg, padding: 14, gap: 2, boxShadow: theme.shadow.card },
-  statHot: { backgroundColor: theme.colors.primary },
+  statHot: { backgroundColor: theme.colors.primary, boxShadow: theme.shadow.primary },
+  statPressed: { opacity: 0.85 },
+  statHead: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 },
+  statIcon: { width: 32, height: 32, borderRadius: 16, backgroundColor: theme.colors.orange50, alignItems: 'center', justifyContent: 'center' },
+  statIconHot: { backgroundColor: 'rgba(255,255,255,0.22)' },
   // 매출 카드는 키가 커서 그림자 번짐이 과해 보이므로 그림자 없이 흰 배경만으로 구분한다
   card: { backgroundColor: theme.colors.white, borderRadius: theme.radius.lg, padding: 16, gap: 14 },
   cardHead: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
