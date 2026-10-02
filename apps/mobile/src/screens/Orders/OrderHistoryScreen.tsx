@@ -66,25 +66,27 @@ const OrderHistoryScreen = () => {
 
   return (
     <ScreenWrapper backgroundColor={theme.colors.bg}>
-      <View style={styles.filters}>
-        <View style={styles.chipRow}>
-          {PERIODS.map((p) => (
-            <Pressable key={p.key} onPress={() => setPeriod(p.key)} style={[styles.chip, period === p.key && styles.chipActive]}>
-              <Typography mode="subtitle4" color={period === p.key ? 'white' : 'gray700'}>
-                {p.label}
-              </Typography>
-            </Pressable>
-          ))}
-        </View>
-        <View style={styles.chipRow}>
-          {STATUS_FILTERS.map((s) => (
-            <Pressable key={s.key} onPress={() => setStatusKey(s.key)} style={[styles.chip, styles.chipOutline, statusKey === s.key && styles.chipOutlineActive]}>
-              <Typography mode="subtitle4" color={statusKey === s.key ? 'orange700' : 'gray600'}>
+      {/* 기간은 "설정"이라 뱃지로, 상태는 "분류"라 주문현황 화면과 같은 밑줄 탭으로. 모양을 달리해 두 선택이 섞여 보이지 않게 한다 */}
+      <View style={styles.periodRow}>
+        {PERIODS.map((p) => (
+          <Pressable key={p.key} onPress={() => setPeriod(p.key)} style={[styles.chip, period === p.key && styles.chipActive]}>
+            <Typography mode="subtitle4" color={period === p.key ? 'white' : 'gray700'}>
+              {p.label}
+            </Typography>
+          </Pressable>
+        ))}
+      </View>
+      <View style={styles.tabs}>
+        {STATUS_FILTERS.map((s) => {
+          const active = statusKey === s.key;
+          return (
+            <Pressable key={s.key} onPress={() => setStatusKey(s.key)} style={[styles.tab, active && styles.tabActive]}>
+              <Typography mode="subtitle3" color={active ? 'orange700' : 'gray500'}>
                 {s.label}
               </Typography>
             </Pressable>
-          ))}
-        </View>
+          );
+        })}
       </View>
 
       {orders === null ? (
@@ -132,12 +134,13 @@ const OrderHistoryScreen = () => {
 };
 
 const styles = StyleSheet.create({
-  filters: { backgroundColor: theme.colors.white, paddingHorizontal: 16, paddingBottom: 12, gap: 8, borderBottomWidth: 1, borderBottomColor: theme.colors.line },
-  chipRow: { flexDirection: 'row', gap: 8 },
+  periodRow: { flexDirection: 'row', gap: 8, backgroundColor: theme.colors.white, paddingHorizontal: 16, paddingBottom: 12 },
   chip: { paddingHorizontal: 12, height: 32, borderRadius: theme.radius.pill, backgroundColor: theme.colors.gray100, alignItems: 'center', justifyContent: 'center' },
   chipActive: { backgroundColor: theme.colors.gray900 },
-  chipOutline: { backgroundColor: theme.colors.white, borderWidth: 1, borderColor: theme.colors.line },
-  chipOutlineActive: { borderColor: theme.colors.primary, backgroundColor: theme.colors.orange50 },
+  // 주문현황(OrdersScreen) 탭과 같은 모양
+  tabs: { flexDirection: 'row', backgroundColor: theme.colors.white, borderBottomWidth: 1, borderBottomColor: theme.colors.line },
+  tab: { flex: 1, height: 46, alignItems: 'center', justifyContent: 'center', borderBottomWidth: 2, borderBottomColor: 'transparent' },
+  tabActive: { borderBottomColor: theme.colors.primary },
   list: { padding: 16, gap: 10, flexGrow: 1 },
   dayHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'baseline', paddingTop: 8, paddingBottom: 2, paddingHorizontal: 4 },
   empty: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 12, paddingVertical: 80 },
