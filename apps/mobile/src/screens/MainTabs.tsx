@@ -8,6 +8,7 @@ import { useOrderFeed } from '@contexts/OrderFeedContext';
 import { Header, Typography } from '@components/common';
 import { theme } from '@styles';
 import HomeScreen from './Home/HomeScreen';
+import HomeHeader from './Home/HomeHeader';
 import OrdersScreen from './Orders/OrdersScreen';
 import MenusScreen from './Menus/MenusScreen';
 import StoreScreen from './Store/StoreScreen';
@@ -75,7 +76,7 @@ const MainTabs = () => {
       <Tab.Screen
         name="Home"
         component={HomeScreen}
-        options={{ headerShown: false, tabBarIcon: ({ focused }) => <TabIcon name="Home" focused={focused} /> }}
+        options={{ header: () => <HomeHeader />, tabBarIcon: ({ focused }) => <TabIcon name="Home" focused={focused} /> }}
       />
       <Tab.Screen
         name="Orders"
