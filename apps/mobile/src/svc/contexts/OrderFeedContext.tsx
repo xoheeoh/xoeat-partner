@@ -76,7 +76,7 @@ export function OrderFeedProvider({ children, enabled }: { children: React.React
         Toast.show({
           type: 'success',
           text1: `새 주문이 들어왔어요 · ${e.order.orderType === 'DELIVERY' ? '배달' : '포장'} ${e.order.totalAmount.toLocaleString('ko-KR')}원`,
-          text2: '주문현황 탭에서 수락 또는 거절해 주세요.',
+          text2: '주문 현황 탭에서 수락 또는 거절해 주세요.',
           visibilityTime: 4000,
         });
       }

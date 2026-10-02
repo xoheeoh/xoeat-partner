@@ -23,8 +23,8 @@ const TAB_ITEM_WIDTH = 72;
 
 const TABS: Record<keyof MainTabParamList, { label: string; icon: IconName; iconActive: IconName }> = {
   Home: { label: '홈', icon: 'home-outline', iconActive: 'home' },
-  Orders: { label: '주문현황', icon: 'receipt-text-outline', iconActive: 'receipt-text' },
-  Menus: { label: '메뉴관리', icon: 'silverware-fork-knife', iconActive: 'silverware-fork-knife' },
+  Orders: { label: '주문 현황', icon: 'receipt-text-outline', iconActive: 'receipt-text' },
+  Menus: { label: '메뉴 관리', icon: 'silverware-fork-knife', iconActive: 'silverware-fork-knife' },
   Store: { label: '가게', icon: 'storefront-outline', iconActive: 'storefront' },
 };
 
@@ -49,7 +49,7 @@ const TabIcon = ({ name, focused, badge }: { name: keyof MainTabParamList; focus
   );
 };
 
-/** 하단 4탭. 주문현황 탭에는 접수대기 건수 배지가 붙는다 */
+/** 하단 4탭. 주문 현황 탭에는 접수대기 건수 배지가 붙는다 */
 const MainTabs = () => {
   const { counts } = useOrderFeed();
   const insets = useSafeAreaInsets();
@@ -82,7 +82,7 @@ const MainTabs = () => {
         name="Orders"
         component={OrdersScreen}
         options={{
-          header: () => <Header title="주문현황" bgColor="white" />,
+          header: () => <Header title="주문 현황" bgColor="white" />,
           tabBarIcon: ({ focused }) => <TabIcon name="Orders" focused={focused} badge={counts.PENDING} />,
         }}
       />
@@ -90,7 +90,7 @@ const MainTabs = () => {
         name="Menus"
         component={MenusScreen}
         options={{
-          header: () => <Header title="메뉴관리" bgColor="white" />,
+          header: () => <Header title="메뉴 관리" bgColor="white" />,
           tabBarIcon: ({ focused }) => <TabIcon name="Menus" focused={focused} />,
         }}
       />

@@ -280,7 +280,7 @@ const MenuEditScreen: React.FC<Props> = ({ navigation, route }) => {
           <View style={{ gap: 8 }}>
             {groups.length === 0 && (
               <Typography mode="body2" color="gray500">
-                등록된 옵션 그룹이 없어요. 메뉴관리 › 옵션 그룹 탭에서 먼저 만들어 주세요.
+                등록된 옵션 그룹이 없어요. 메뉴 관리 › 옵션 그룹 탭에서 먼저 만들어 주세요.
               </Typography>
             )}
             {groups.map((g) => {
