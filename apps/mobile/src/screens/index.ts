@@ -18,3 +18,4 @@ export { default as StoreHoursScreen } from './Store/StoreHoursScreen';
 export { default as OperationSettingScreen } from './Store/OperationSettingScreen';
 export { default as SettlementScreen } from './Store/SettlementScreen';
 export { default as NoticeScreen } from './Store/NoticeScreen';
+export { default as NotificationsScreen } from './Store/NotificationsScreen';

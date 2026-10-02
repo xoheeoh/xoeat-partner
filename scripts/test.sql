@@ -94,6 +94,18 @@ begin
   o2 := public.accept_order(o.id, null, true);
   perform pg_temp.check('자체 배달 수락: 조리시간 없이 self_delivery', o2.status = 'ACCEPTED' and o2.self_delivery and o2.cooking_minutes is null);
 
+  -- 알림함
+  perform pg_temp.check('알림: 새 주문마다 NEW_ORDER 알림이 생긴다',
+                        (select count(*) from public.notifications where kind = 'NEW_ORDER') = (select count(*) from public.orders));
+  perform pg_temp.check('알림: 방금 주문의 알림이 주문을 가리킨다',
+                        exists (select 1 from public.notifications where kind = 'NEW_ORDER' and order_id = o.id and read_at is null));
+  perform pg_temp.check('알림: 사장님 본인 취소는 알리지 않는다', (select count(*) from public.notifications where kind = 'ORDER_CANCELED') = 0);
+  perform pg_temp.check('알림: 하나만 읽음 처리',
+                        public.mark_notifications_read(array[(select id from public.notifications where order_id = o.id)]) = 1
+                        and (select read_at from public.notifications where order_id = o.id) is not null);
+  perform pg_temp.check('알림: 모두 읽음 처리 후 안 읽은 알림 0',
+                        public.mark_notifications_read() >= 1 and (select count(*) from public.notifications where read_at is null) = 0);
+
   -- 영업 상태
   perform public.set_store_status('PAUSED');
   perform pg_temp.check('영업 일시중지', (select status from public.stores) = 'PAUSED');
@@ -245,6 +257,10 @@ begin
   perform pg_temp.check('사장님: 구매자 주문이 접수대기에 보인다', o.id is not null and o.order_type = 'PICKUP');
   perform pg_temp.check('사장님: 회원 테이블은 보이지 않는다', (select count(*) from public.customers) = 0);
   perform pg_temp.check('사장님: 다른 가게 메뉴는 여전히 안 보인다', (select count(distinct store_id) from public.menus) = 1);
+  perform pg_temp.check('사장님: 구매자가 취소한 주문의 ORDER_CANCELED 알림이 있다',
+                        exists (select 1 from public.notifications n join public.orders x on x.id = n.order_id
+                                 where n.kind = 'ORDER_CANCELED' and x.status = 'CANCELED' and x.customer_id = 'bbbbbbbb-0000-0000-0000-000000000001'));
+  perform pg_temp.check('사장님: 알림은 내 가게 것만 보인다', (select count(distinct store_id) from public.notifications) = 1);
   o := public.accept_order(o.id);
   perform pg_temp.check('사장님: 구매자 포장 주문 수락', o.status = 'ACCEPTED');
 end $$;
