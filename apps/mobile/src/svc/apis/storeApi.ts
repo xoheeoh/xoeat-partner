@@ -82,6 +82,10 @@ export const getMyStore = () =>
 
 export const updateStore = (patch: Partial<StoreEditable>) =>
   run(async () => {
+    // 서버(PostgREST)는 조건 없는 UPDATE 를 거부한다("UPDATE requires a WHERE clause").
+    // RLS 가 내 가게만 허용하더라도 조건은 명시해야 하므로 로그인한 사장님(owner_id)으로 좁힌다.
+    const ownerId = (await supabase.auth.getSession()).data.session?.user.id;
+    if (!ownerId) throw Object.assign(new Error('UNAUTHENTICATED'), { code: 'UNAUTHENTICATED' });
     const row = unwrap(
       await supabase
         .from('stores')
@@ -98,6 +102,7 @@ export const updateStore = (patch: Partial<StoreEditable>) =>
           ...(patch.pickupEnabled !== undefined && { pickup_enabled: patch.pickupEnabled }),
           ...(patch.selfDelivery !== undefined && { self_delivery: patch.selfDelivery }),
         })
+        .eq('owner_id', ownerId)
         .select('*')
         .single<StoreRow>(),
     );
