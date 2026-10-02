@@ -185,5 +185,19 @@ export interface Notice {
   createdAt: string;
 }
 
+/** 알림함 한 줄. 서버 트리거가 만들고 앱은 읽기·읽음 처리만 한다 */
+export interface AppNotification {
+  id: number;
+  kind: 'NEW_ORDER' | 'ORDER_CANCELED' | 'NOTICE';
+  title: string;
+  body: string;
+  /** 누르면 갈 주문 (NEW_ORDER · ORDER_CANCELED) */
+  orderId: string | null;
+  /** 누르면 갈 공지 (NOTICE) */
+  noticeId: number | null;
+  readAt: string | null;
+  createdAt: string;
+}
+
 /** 주문 목록 탭. ING 는 ACCEPTED·READY·DELIVERING 을 묶은 값 */
 export type OrderTab = 'PENDING' | 'ING' | 'COMPLETED' | 'CLOSED';

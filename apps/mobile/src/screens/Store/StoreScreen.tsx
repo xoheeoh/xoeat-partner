@@ -104,7 +104,7 @@ const StoreScreen = () => {
           <View style={styles.sep} />
           <MenuRow icon="cash-multiple" label="정산 내역" onPress={() => navigation.navigate('Settlement')} />
           <View style={styles.sep} />
-          <MenuRow icon="bell-outline" label="공지사항" onPress={() => navigation.navigate('Notice')} />
+          <MenuRow icon="bullhorn-outline" label="공지사항" desc="운영사 안내 · 점검 · 이벤트" onPress={() => navigation.navigate('Notice')} />
           <View style={styles.sep} />
           <View style={styles.menuRow}>
             <MaterialCommunityIcons name="volume-high" size={22} color={theme.colors.gray700} />

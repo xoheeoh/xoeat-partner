@@ -35,6 +35,7 @@
 ## 3분 둘러보기
 
 1. **홈** — `owner01` 로 로그인하면 영업 상태, 접수대기·진행중 건수, 오늘 매출(완료 건수)과 이번 달 매출(주 단위 추이)이 보입니다.
+   오른쪽 위 종 아이콘은 **알림함**입니다. 새 주문·고객 취소·새 공지가 서버 트리거로 쌓이고, 안 읽은 게 있으면 빨간 점이 뜹니다.
 2. **주문 받기** — 홈 맨 아래 `주문 넣기` 를 누르면 알림음과 함께 새 주문이 들어옵니다. 주문현황 탭 배지가 늘어납니다.
 3. **수락 / 거절** — 주문현황 › 접수대기에서 `주문 수락`. 배달 주문이면 예상 조리시간(10·20·30·40분)이나 **자체 배달**을 고르고,
    포장 주문이면 바로 수락됩니다. `거절` 은 사유(재료 소진·영업 조기 마감·…·직접 입력)를 받습니다.
@@ -58,7 +59,7 @@ xoeat-partner/
     src/components/order/       주문 카드 · 영수증 · 상태별 액션(수락 시트 · 거절 시트)
     src/components/home/        이번 달 매출 주 단위 막대
     src/svc/apis/               API 어댑터 — 화면이 기대하는 { resultCd, resultMsg, ... } 응답을 만든다
-    src/svc/contexts/           Store(내 가게) · OrderFeed(Realtime 구독·알림음·건수) · Dialog · Loading
+    src/svc/contexts/           Store(내 가게) · OrderFeed(Realtime 구독·알림음·건수) · Notification(알림함 안 읽은 개수) · Dialog · Loading
     src/svc/data/constants.ts   상태 라벨·색, 거절 사유, 조리시간 선택지, 업종
     src/styles/                 디자인 토큰 — 색(시맨틱 + 스케일) · radius · space · shadow
   docs/api-spec.md              앱이 연동 기준으로 삼은 API 명세 (상태 전이 규칙 포함)

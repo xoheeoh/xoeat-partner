@@ -17,6 +17,7 @@ import { LoadingProvider, useLoading } from '@contexts/LoadingContext';
 import { NavigationProvider } from '@contexts/navigationContext';
 import { StoreProvider } from '@contexts/StoreContext';
 import { OrderFeedProvider } from '@contexts/OrderFeedContext';
+import { NotificationProvider } from '@contexts/NotificationContext';
 
 import { Header, toastConfig } from '@components/common';
 import {
@@ -25,6 +26,7 @@ import {
   MainTabs,
   MenuEditScreen,
   NoticeScreen,
+  NotificationsScreen,
   OperationSettingScreen,
   OptionGroupEditScreen,
   OrderDetailScreen,
@@ -124,74 +126,101 @@ function App(): React.JSX.Element {
 
             <StoreProvider enabled={isLoggedIn}>
               <OrderFeedProvider enabled={isLoggedIn}>
-                <NavigationProvider>
-                  <Stack.Navigator initialRouteName={getInitialRoute()}>
-                    <Stack.Screen name="Login" component={LoginScreen} options={{ headerShown: false, gestureEnabled: false }} />
-                    <Stack.Screen name="Main" component={MainTabs} options={{ headerShown: false, gestureEnabled: false }} />
+                <NotificationProvider enabled={isLoggedIn}>
+                  <NavigationProvider>
+                    <Stack.Navigator initialRouteName={getInitialRoute()}>
+                      <Stack.Screen
+                        name="Login"
+                        component={LoginScreen}
+                        options={{ headerShown: false, gestureEnabled: false }}
+                      />
+                      <Stack.Screen
+                        name="Main"
+                        component={MainTabs}
+                        options={{ headerShown: false, gestureEnabled: false }}
+                      />
 
-                    {/* 주문 */}
-                    <Stack.Screen
-                      name="OrderDetail"
-                      component={OrderDetailScreen}
-                      options={{ header: () => <Header title="주문 상세" bgColor={theme.colors.bg} leftButton /> }}
-                    />
-                    <Stack.Screen
-                      name="OrderHistory"
-                      component={OrderHistoryScreen}
-                      options={{ header: () => <Header title="주문 내역" bgColor="white" leftButton /> }}
-                    />
+                      {/* 주문 */}
+                      <Stack.Screen
+                        name="OrderDetail"
+                        component={OrderDetailScreen}
+                        options={{ header: () => <Header title="주문 상세" bgColor={theme.colors.bg} leftButton /> }}
+                      />
+                      <Stack.Screen
+                        name="OrderHistory"
+                        component={OrderHistoryScreen}
+                        options={{ header: () => <Header title="주문 내역" bgColor="white" leftButton /> }}
+                      />
 
-                    {/* 메뉴 */}
-                    <Stack.Screen
-                      name="MenuEdit"
-                      component={MenuEditScreen}
-                      options={({ route }) => ({
-                        header: () => <Header title={route.params?.menuId ? '메뉴 수정' : '메뉴 등록'} bgColor="white" leftButton />,
-                      })}
-                    />
-                    <Stack.Screen
-                      name="CategoryManage"
-                      component={CategoryManageScreen}
-                      options={{ header: () => <Header title="카테고리 관리" bgColor="white" leftButton /> }}
-                    />
-                    <Stack.Screen
-                      name="OptionGroupEdit"
-                      component={OptionGroupEditScreen}
-                      options={({ route }) => ({
-                        header: () => <Header title={route.params?.groupId ? '옵션 그룹 수정' : '옵션 그룹 등록'} bgColor="white" leftButton />,
-                      })}
-                    />
+                      {/* 메뉴 */}
+                      <Stack.Screen
+                        name="MenuEdit"
+                        component={MenuEditScreen}
+                        options={({ route }) => ({
+                          header: () => (
+                            <Header
+                              title={route.params?.menuId ? '메뉴 수정' : '메뉴 등록'}
+                              bgColor="white"
+                              leftButton
+                            />
+                          ),
+                        })}
+                      />
+                      <Stack.Screen
+                        name="CategoryManage"
+                        component={CategoryManageScreen}
+                        options={{ header: () => <Header title="카테고리 관리" bgColor="white" leftButton /> }}
+                      />
+                      <Stack.Screen
+                        name="OptionGroupEdit"
+                        component={OptionGroupEditScreen}
+                        options={({ route }) => ({
+                          header: () => (
+                            <Header
+                              title={route.params?.groupId ? '옵션 그룹 수정' : '옵션 그룹 등록'}
+                              bgColor="white"
+                              leftButton
+                            />
+                          ),
+                        })}
+                      />
 
-                    {/* 가게 */}
-                    <Stack.Screen
-                      name="StoreInfoEdit"
-                      component={StoreInfoEditScreen}
-                      options={{ header: () => <Header title="가게 정보 관리" bgColor="white" leftButton /> }}
-                    />
-                    <Stack.Screen
-                      name="StoreHours"
-                      component={StoreHoursScreen}
-                      options={{ header: () => <Header title="영업시간 설정" bgColor="white" leftButton /> }}
-                    />
-                    <Stack.Screen
-                      name="OperationSetting"
-                      component={OperationSettingScreen}
-                      options={{ header: () => <Header title="배달/포장 운영 설정" bgColor="white" leftButton /> }}
-                    />
-                    <Stack.Screen
-                      name="Settlement"
-                      component={SettlementScreen}
-                      options={{ header: () => <Header title="정산 내역" bgColor={theme.colors.bg} leftButton /> }}
-                    />
-                    <Stack.Screen
-                      name="Notice"
-                      component={NoticeScreen}
-                      options={{ header: () => <Header title="공지사항" bgColor="white" leftButton /> }}
-                    />
-                  </Stack.Navigator>
+                      {/* 가게 */}
+                      <Stack.Screen
+                        name="StoreInfoEdit"
+                        component={StoreInfoEditScreen}
+                        options={{ header: () => <Header title="가게 정보 관리" bgColor="white" leftButton /> }}
+                      />
+                      <Stack.Screen
+                        name="StoreHours"
+                        component={StoreHoursScreen}
+                        options={{ header: () => <Header title="영업시간 설정" bgColor="white" leftButton /> }}
+                      />
+                      <Stack.Screen
+                        name="OperationSetting"
+                        component={OperationSettingScreen}
+                        options={{ header: () => <Header title="배달/포장 운영 설정" bgColor="white" leftButton /> }}
+                      />
+                      <Stack.Screen
+                        name="Settlement"
+                        component={SettlementScreen}
+                        options={{ header: () => <Header title="정산 내역" bgColor={theme.colors.bg} leftButton /> }}
+                      />
+                      <Stack.Screen
+                        name="Notice"
+                        component={NoticeScreen}
+                        options={{ header: () => <Header title="공지사항" bgColor="white" leftButton /> }}
+                      />
+                      <Stack.Screen
+                        name="Notifications"
+                        component={NotificationsScreen}
+                        options={{ header: () => <Header title="알림" bgColor="white" leftButton /> }}
+                      />
+                    </Stack.Navigator>
 
-                  <Toast position="top" topOffset={70} config={toastConfig} />
-                </NavigationProvider>
+                    <Toast position="top" topOffset={70} config={toastConfig} />
+                  </NavigationProvider>
+                </NotificationProvider>
               </OrderFeedProvider>
             </StoreProvider>
           </DialogProvider>

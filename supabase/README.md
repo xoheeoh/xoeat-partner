@@ -32,9 +32,9 @@ scripts/
 | 용도 | 경로 | 예 |
 | --- | --- | --- |
 | 조회 · 메뉴 CRUD | PostgREST (`/rest/v1/...`) | 가게, 메뉴, 옵션, 주문 목록, 정산 뷰 |
-| 주문 상태 변경 · 집계 | RPC (`/rest/v1/rpc/...`) | `accept_order`, `reject_order`, `advance_order`, `dashboard_summary` |
+| 주문 상태 변경 · 집계 | RPC (`/rest/v1/rpc/...`) | `accept_order`, `reject_order`, `advance_order`, `dashboard_summary`, `mark_notifications_read` |
 | 구매자 주문 생성·취소 | RPC | `place_order`, `cancel_my_order` |
-| 새 주문 알림 | Realtime (`/realtime/v1`) | `orders` INSERT/UPDATE |
+| 새 주문 알림 | Realtime (`/realtime/v1`) | `orders` INSERT/UPDATE, `notifications` INSERT |
 | 이미지 | Storage (`/storage/v1`) | 버킷 `menu-images` |
 
 ## 데이터 모델
@@ -46,6 +46,7 @@ stores ─1:N─ store_hours
                  └─N:1─ customers ─1:N─ addresses · payment_methods · favorites
 settlements (뷰: 완료 주문을 완료일 기준으로 집계)
 notices
+notifications (가게별 알림함. orders/notices 트리거가 만들고 앱은 읽기·읽음 처리만)
 ```
 
 ## 서버가 보장하는 것 (앱이 기대하는 계약)

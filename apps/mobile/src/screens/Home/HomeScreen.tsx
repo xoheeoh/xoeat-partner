@@ -12,6 +12,7 @@ import { createDemoOrder } from '@apis/orderApi';
 import { isOk } from '@apis/client';
 import { useStore } from '@contexts/StoreContext';
 import { useOrderFeed } from '@contexts/OrderFeedContext';
+import { useNotifications } from '@contexts/NotificationContext';
 import { useDialog } from '@contexts/DialogContext';
 import { loadingController } from '@utils/loadingController';
 import { todayKo, won } from '@utils/formatter';
@@ -36,20 +37,26 @@ const monthDaysOf = (summary: DashboardSummary): DailySales[] => {
 };
 
 /** 홈 상단 "지금 할 일" 카드. hot 이면 브랜드색으로 채워 눈에 띄게 한다 */
-const TodoCard: React.FC<{ icon: IconName; label: string; count: number; hint: string; hot?: boolean; onPress: () => void }> = ({
-  icon,
-  label,
-  count,
-  hint,
-  hot = false,
-  onPress,
-}) => (
-  <Pressable style={({ pressed }) => [styles.stat, hot && styles.statHot, pressed && styles.statPressed]} onPress={onPress}>
+const TodoCard: React.FC<{
+  icon: IconName;
+  label: string;
+  count: number;
+  hint: string;
+  hot?: boolean;
+  onPress: () => void;
+}> = ({ icon, label, count, hint, hot = false, onPress }) => (
+  <Pressable
+    style={({ pressed }) => [styles.stat, hot && styles.statHot, pressed && styles.statPressed]}
+    onPress={onPress}>
     <View style={styles.statHead}>
       <View style={[styles.statIcon, hot && styles.statIconHot]}>
         <MaterialCommunityIcons name={icon} size={18} color={hot ? theme.colors.white : theme.colors.orange600} />
       </View>
-      <MaterialCommunityIcons name="chevron-right" size={18} color={hot ? 'rgba(255,255,255,0.7)' : theme.colors.gray300} />
+      <MaterialCommunityIcons
+        name="chevron-right"
+        size={18}
+        color={hot ? 'rgba(255,255,255,0.7)' : theme.colors.gray300}
+      />
     </View>
     <Typography mode="caption1" color={hot ? 'white' : 'gray500'}>
       {label}
@@ -57,7 +64,8 @@ const TodoCard: React.FC<{ icon: IconName; label: string; count: number; hint: s
     <Typography mode="heading1" color={hot ? 'white' : 'gray900'}>
       {count}
       <Typography mode="subtitle3" color={hot ? 'white' : 'gray500'}>
-        {' '}건
+        {' '}
+        건
       </Typography>
     </Typography>
     <Typography mode="caption2" color={hot ? 'white' : 'gray400'} numberOfLines={1}>
@@ -71,6 +79,7 @@ const HomeScreen = () => {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const { store, setStatus, refresh } = useStore();
   const { counts, lastEvent, refreshCounts } = useOrderFeed();
+  const { unreadCount } = useNotifications();
   const { confirm } = useDialog();
   const [summary, setSummary] = useState<DashboardSummary | null>(null);
   const [refreshing, setRefreshing] = useState(false);
@@ -107,14 +116,30 @@ const HomeScreen = () => {
   const toggleStatus = async () => {
     const yes = await confirm(
       paused
-        ? { title: '영업 재개', message1: '영업을 다시 시작할까요?', message2: '고객 앱에 가게가 다시 노출되고 주문을 받습니다.', confirmText: '영업 재개', cancelText: '닫기' }
-        : { title: '영업 일시중지', message1: '영업을 잠시 멈출까요?', message2: '멈춘 동안에는 새 주문이 들어오지 않습니다. 진행중인 주문은 계속 처리할 수 있어요.', confirmText: '일시중지', cancelText: '닫기' },
+        ? {
+            title: '영업 재개',
+            message1: '영업을 다시 시작할까요?',
+            message2: '고객 앱에 가게가 다시 노출되고 주문을 받습니다.',
+            confirmText: '영업 재개',
+            cancelText: '닫기',
+          }
+        : {
+            title: '영업 일시중지',
+            message1: '영업을 잠시 멈출까요?',
+            message2: '멈춘 동안에는 새 주문이 들어오지 않습니다. 진행중인 주문은 계속 처리할 수 있어요.',
+            confirmText: '일시중지',
+            cancelText: '닫기',
+          },
     );
     if (!yes) return;
     loadingController.start();
     const ok = await setStatus(paused ? 'OPEN' : 'PAUSED');
     loadingController.stop();
-    Toast.show(ok ? { type: 'success', text1: paused ? '영업을 재개했어요' : '영업을 일시중지했어요' } : { type: 'error', text1: '상태를 바꾸지 못했어요' });
+    Toast.show(
+      ok
+        ? { type: 'success', text1: paused ? '영업을 재개했어요' : '영업을 일시중지했어요' }
+        : { type: 'error', text1: '상태를 바꾸지 못했어요' },
+    );
   };
 
   const handleDemoOrder = async () => {
@@ -130,7 +155,9 @@ const HomeScreen = () => {
     <ScreenWrapper hasHeader={false} backgroundColor={theme.colors.bg} inTab>
       <ScrollView
         contentContainerStyle={styles.container}
-        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={theme.colors.primary} />}>
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={theme.colors.primary} />
+        }>
         {/* 상단: 가게명 · 영업 상태 · 공지 */}
         <View style={styles.topRow}>
           <View style={{ flex: 1, gap: 2 }}>
@@ -143,7 +170,12 @@ const HomeScreen = () => {
               </Typography>
               {store && (
                 <View style={[styles.statusPill, paused ? styles.statusPaused : styles.statusOpen]}>
-                  <View style={[styles.statusDot, { backgroundColor: paused ? theme.colors.yellow600 : theme.colors.green500 }]} />
+                  <View
+                    style={[
+                      styles.statusDot,
+                      { backgroundColor: paused ? theme.colors.yellow600 : theme.colors.green500 },
+                    ]}
+                  />
                   <Typography mode="caption2" color={paused ? 'yellow900' : 'green900'}>
                     {paused ? '일시중지' : '영업중'}
                   </Typography>
@@ -151,8 +183,14 @@ const HomeScreen = () => {
               )}
             </View>
           </View>
-          <Pressable onPress={() => navigation.navigate('Notice')} hitSlop={8} style={styles.bell}>
+          {/* 종 = 알림함(나에게 일어난 일). 공지사항은 가게 탭에 있다 */}
+          <Pressable
+            onPress={() => navigation.navigate('Notifications')}
+            hitSlop={8}
+            style={styles.bell}
+            accessibilityLabel={unreadCount > 0 ? `알림 ${unreadCount}개` : '알림'}>
             <MaterialCommunityIcons name="bell-outline" size={24} color={theme.colors.gray700} />
+            {unreadCount > 0 && <View style={styles.bellDot} />}
           </Pressable>
         </View>
 
@@ -295,7 +333,26 @@ const styles = StyleSheet.create({
   topRow: { flexDirection: 'row', alignItems: 'flex-start', gap: 12 },
   nameRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   bell: { width: 40, height: 40, alignItems: 'center', justifyContent: 'center', marginTop: 4 },
-  statusPill: { flexDirection: 'row', alignItems: 'center', gap: 5, paddingHorizontal: 8, height: 22, borderRadius: theme.radius.pill },
+  // 안 읽은 알림 표시. 종 오른쪽 위에 흰 테두리를 둘러 아이콘 선과 겹쳐도 또렷하다
+  bellDot: {
+    position: 'absolute',
+    top: 7,
+    right: 8,
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    backgroundColor: theme.colors.red500,
+    borderWidth: 2,
+    borderColor: theme.colors.bg,
+  },
+  statusPill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+    paddingHorizontal: 8,
+    height: 22,
+    borderRadius: theme.radius.pill,
+  },
   statusOpen: { backgroundColor: theme.colors.green50 },
   statusPaused: { backgroundColor: theme.colors.yellow50 },
   statusDot: { width: 6, height: 6, borderRadius: 3 },
@@ -311,11 +368,25 @@ const styles = StyleSheet.create({
   },
   pauseLink: { flexDirection: 'row', alignItems: 'center', gap: 6, alignSelf: 'flex-start' },
   statsRow: { flexDirection: 'row', gap: 10 },
-  stat: { flex: 1, backgroundColor: theme.colors.white, borderRadius: theme.radius.lg, padding: 14, gap: 2, boxShadow: theme.shadow.card },
+  stat: {
+    flex: 1,
+    backgroundColor: theme.colors.white,
+    borderRadius: theme.radius.lg,
+    padding: 14,
+    gap: 2,
+    boxShadow: theme.shadow.card,
+  },
   statHot: { backgroundColor: theme.colors.primary, boxShadow: theme.shadow.primary },
   statPressed: { opacity: 0.85 },
   statHead: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 },
-  statIcon: { width: 32, height: 32, borderRadius: 16, backgroundColor: theme.colors.orange50, alignItems: 'center', justifyContent: 'center' },
+  statIcon: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: theme.colors.orange50,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   statIconHot: { backgroundColor: 'rgba(255,255,255,0.22)' },
   // 매출 카드는 키가 커서 그림자 번짐이 과해 보이므로 그림자 없이 흰 배경만으로 구분한다
   card: { backgroundColor: theme.colors.white, borderRadius: theme.radius.lg, padding: 16, gap: 14 },
@@ -337,7 +408,14 @@ const styles = StyleSheet.create({
     borderColor: theme.colors.orange100,
   },
   quickPressed: { backgroundColor: theme.colors.orange100, borderColor: theme.colors.orange200 },
-  quickIcon: { width: 40, height: 40, borderRadius: 20, backgroundColor: theme.colors.white, alignItems: 'center', justifyContent: 'center' },
+  quickIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: theme.colors.white,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   demoBox: {
     flexDirection: 'row',
     alignItems: 'center',

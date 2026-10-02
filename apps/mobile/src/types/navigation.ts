@@ -17,6 +17,9 @@ export type RootStackParamList = {
   OrderDetail: { orderId: string };
   OrderHistory: undefined;
 
+  // 알림함 (홈 종 아이콘)
+  Notifications: undefined;
+
   // 메뉴
   MenuEdit: { menuId?: string } | undefined;
   CategoryManage: undefined;
