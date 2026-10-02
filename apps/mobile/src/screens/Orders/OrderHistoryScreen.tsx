@@ -66,7 +66,7 @@ const OrderHistoryScreen = () => {
 
   return (
     <ScreenWrapper backgroundColor={theme.colors.bg}>
-      {/* 기간은 "설정"이라 뱃지로, 상태는 "분류"라 주문현황 화면과 같은 밑줄 탭으로. 모양을 달리해 두 선택이 섞여 보이지 않게 한다 */}
+      {/* 기간은 "설정"이라 뱃지로, 상태는 "분류"라 주문 현황 화면과 같은 밑줄 탭으로. 모양을 달리해 두 선택이 섞여 보이지 않게 한다 */}
       <View style={styles.periodRow}>
         {PERIODS.map((p) => (
           <Pressable key={p.key} onPress={() => setPeriod(p.key)} style={[styles.chip, period === p.key && styles.chipActive]}>
@@ -137,7 +137,7 @@ const styles = StyleSheet.create({
   periodRow: { flexDirection: 'row', gap: 8, backgroundColor: theme.colors.white, paddingHorizontal: 16, paddingBottom: 12 },
   chip: { paddingHorizontal: 12, height: 32, borderRadius: theme.radius.pill, backgroundColor: theme.colors.gray100, alignItems: 'center', justifyContent: 'center' },
   chipActive: { backgroundColor: theme.colors.gray900 },
-  // 주문현황(OrdersScreen) 탭과 같은 모양
+  // 주문 현황(OrdersScreen) 탭과 같은 모양
   tabs: { flexDirection: 'row', backgroundColor: theme.colors.white, borderBottomWidth: 1, borderBottomColor: theme.colors.line },
   tab: { flex: 1, height: 46, alignItems: 'center', justifyContent: 'center', borderBottomWidth: 2, borderBottomColor: 'transparent' },
   tabActive: { borderBottomColor: theme.colors.primary },

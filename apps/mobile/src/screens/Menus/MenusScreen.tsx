@@ -259,7 +259,7 @@ const OptionGroupList: React.FC<{ nav: Nav }> = ({ nav }) => {
   );
 };
 
-/** 메뉴관리: 메뉴 탭 / 옵션 탭 */
+/** 메뉴 관리: 메뉴 탭 / 옵션 탭 */
 const MenusScreen = () => {
   const nav = useNavigation<Nav>();
   const [tab, setTab] = useState<1 | 2>(1);
