@@ -12,10 +12,9 @@ import { createDemoOrder } from '@apis/orderApi';
 import { isOk } from '@apis/client';
 import { useStore } from '@contexts/StoreContext';
 import { useOrderFeed } from '@contexts/OrderFeedContext';
-import { useNotifications } from '@contexts/NotificationContext';
 import { useDialog } from '@contexts/DialogContext';
 import { loadingController } from '@utils/loadingController';
-import { todayKo, won } from '@utils/formatter';
+import { todayKoShort, won } from '@utils/formatter';
 import { MonthSalesChart } from '@components/home';
 import { PrimaryButton, ScreenWrapper, Skeleton, Typography } from '@components/common';
 import { theme } from '@styles';
@@ -79,7 +78,6 @@ const HomeScreen = () => {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const { store, setStatus, refresh } = useStore();
   const { counts, lastEvent, refreshCounts } = useOrderFeed();
-  const { unreadCount } = useNotifications();
   const { confirm } = useDialog();
   const [summary, setSummary] = useState<DashboardSummary | null>(null);
   const [refreshing, setRefreshing] = useState(false);
@@ -152,49 +150,13 @@ const HomeScreen = () => {
   };
 
   return (
-    <ScreenWrapper hasHeader={false} backgroundColor={theme.colors.bg} inTab>
+    <ScreenWrapper backgroundColor={theme.colors.bg} inTab>
       <ScrollView
         contentContainerStyle={styles.container}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={theme.colors.primary} />
         }>
-        {/* 상단: 가게명 · 영업 상태 · 공지 */}
-        <View style={styles.topRow}>
-          <View style={{ flex: 1, gap: 2 }}>
-            <Typography mode="caption1" color="gray500">
-              {todayKo()}
-            </Typography>
-            <View style={styles.nameRow}>
-              <Typography mode="heading3" color="gray900" numberOfLines={1} style={{ flexShrink: 1 }}>
-                {store?.name ?? ' '}
-              </Typography>
-              {store && (
-                <View style={[styles.statusPill, paused ? styles.statusPaused : styles.statusOpen]}>
-                  <View
-                    style={[
-                      styles.statusDot,
-                      { backgroundColor: paused ? theme.colors.yellow600 : theme.colors.green500 },
-                    ]}
-                  />
-                  <Typography mode="caption2" color={paused ? 'yellow900' : 'green900'}>
-                    {paused ? '일시중지' : '영업중'}
-                  </Typography>
-                </View>
-              )}
-            </View>
-          </View>
-          {/* 종 = 알림함(나에게 일어난 일). 공지사항은 가게 탭에 있다 */}
-          <Pressable
-            onPress={() => navigation.navigate('Notifications')}
-            hitSlop={8}
-            style={styles.bell}
-            accessibilityLabel={unreadCount > 0 ? `알림 ${unreadCount}개` : '알림'}>
-            <MaterialCommunityIcons name="bell-outline" size={24} color={theme.colors.gray700} />
-            {unreadCount > 0 && <View style={styles.bellDot} />}
-          </Pressable>
-        </View>
-
-        {/* 영업 상태 토글 */}
+        {/* 가게 이름과 알림 종은 공통 Header(HomeHeader)에 있다. 첫 줄은 영업 상태 + 상태를 바꾸는 행동 + 날짜 */}
         {paused ? (
           <View style={styles.pausedBox}>
             {/* 제목 + 설명 두 줄. 운영 설정 화면의 영업 상태 카드와 같은 구성이라 버튼(44px) 높이와도 균형이 맞는다 */}
@@ -203,18 +165,29 @@ const HomeScreen = () => {
                 영업 일시중지 중
               </Typography>
               <Typography mode="caption1" color="yellow900">
-                새 주문이 들어오지 않아요
+                새 주문이 들어오지 않아요 · {todayKoShort()}
               </Typography>
             </View>
             <PrimaryButton label="영업 재개" size="md" onPress={toggleStatus} />
           </View>
         ) : (
-          <Pressable onPress={toggleStatus} style={styles.pauseLink}>
-            <MaterialCommunityIcons name="pause-circle-outline" size={18} color={theme.colors.gray600} />
-            <Typography mode="body2" color="gray600">
-              잠시 주문을 멈추고 싶다면 영업 일시중지
+          <View style={styles.statusRow}>
+            <View style={[styles.statusPill, styles.statusOpen]}>
+              <View style={[styles.statusDot, { backgroundColor: theme.colors.green500 }]} />
+              <Typography mode="caption2" color="green900">
+                영업중
+              </Typography>
+            </View>
+            <Pressable onPress={toggleStatus} style={styles.pauseLink}>
+              <MaterialCommunityIcons name="pause-circle-outline" size={16} color={theme.colors.gray500} />
+              <Typography mode="caption1" color="gray500" numberOfLines={1} style={{ flexShrink: 1 }}>
+                잠시 주문을 멈추고 싶다면 영업 일시중지
+              </Typography>
+            </Pressable>
+            <Typography mode="caption1" color="gray400">
+              {todayKoShort()}
             </Typography>
-          </Pressable>
+          </View>
         )}
 
         {/* 오늘 주문 현황 */}
@@ -329,22 +302,8 @@ const HomeScreen = () => {
 };
 
 const styles = StyleSheet.create({
-  container: { padding: 20, paddingTop: 12, gap: 16, paddingBottom: 32 },
-  topRow: { flexDirection: 'row', alignItems: 'flex-start', gap: 12 },
-  nameRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  bell: { width: 40, height: 40, alignItems: 'center', justifyContent: 'center', marginTop: 4 },
-  // 안 읽은 알림 표시. 종 오른쪽 위에 흰 테두리를 둘러 아이콘 선과 겹쳐도 또렷하다
-  bellDot: {
-    position: 'absolute',
-    top: 7,
-    right: 8,
-    width: 10,
-    height: 10,
-    borderRadius: 5,
-    backgroundColor: theme.colors.red500,
-    borderWidth: 2,
-    borderColor: theme.colors.bg,
-  },
+  container: { padding: 20, paddingTop: theme.screen.topCard, gap: 16, paddingBottom: 32 },
+  statusRow: { flexDirection: 'row', alignItems: 'center', gap: 10 },
   statusPill: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -354,7 +313,6 @@ const styles = StyleSheet.create({
     borderRadius: theme.radius.pill,
   },
   statusOpen: { backgroundColor: theme.colors.green50 },
-  statusPaused: { backgroundColor: theme.colors.yellow50 },
   statusDot: { width: 6, height: 6, borderRadius: 3 },
   pausedBox: {
     flexDirection: 'row',
@@ -366,7 +324,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: theme.colors.yellow200,
   },
-  pauseLink: { flexDirection: 'row', alignItems: 'center', gap: 6, alignSelf: 'flex-start' },
+  pauseLink: { flex: 1, flexDirection: 'row', alignItems: 'center', gap: 4 },
   statsRow: { flexDirection: 'row', gap: 10 },
   stat: {
     flex: 1,
@@ -376,7 +334,8 @@ const styles = StyleSheet.create({
     gap: 2,
     boxShadow: theme.shadow.card,
   },
-  statHot: { backgroundColor: theme.colors.primary, boxShadow: theme.shadow.primary },
+  // 주황 배경만으로 충분히 눈에 띄므로 그림자는 옆 카드와 같은 기본값을 쓴다
+  statHot: { backgroundColor: theme.colors.primary },
   statPressed: { opacity: 0.85 },
   statHead: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 },
   statIcon: {

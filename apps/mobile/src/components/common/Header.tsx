@@ -15,9 +15,11 @@ interface HeaderProps {
   leftEvent?: () => void;
   rightButton?: boolean;
   rightEvent?: () => void;
+  /** 오른쪽 자리에 닫기 버튼 대신 놓을 요소 (예: 홈의 알림 종). NavIconButton 크기(40)에 맞춰 만든다 */
+  right?: React.ReactNode;
 }
 
-const Header: React.FC<HeaderProps> = ({ bgColor, title, leftButton, leftEvent, rightButton, rightEvent }) => {
+const Header: React.FC<HeaderProps> = ({ bgColor, title, leftButton, leftEvent, rightButton, rightEvent, right }) => {
   const navigation = useNavigation<NavigationProp<RootStackParamList>>();
 
   return (
@@ -43,7 +45,9 @@ const Header: React.FC<HeaderProps> = ({ bgColor, title, leftButton, leftEvent, 
           {title}
         </Typography>
         {/* 닫기 버튼: DashboardNav 의 햄버거 버튼과 같은 컴포넌트를 써서 위치·모양을 맞춘다 */}
-        {rightButton ? (
+        {right ? (
+          right
+        ) : rightButton ? (
           <NavIconButton
             icon="close"
             accessibilityLabel="닫기"

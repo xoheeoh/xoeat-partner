@@ -53,6 +53,9 @@ export const dateKo = (ymd: string) => {
   return `${d.getMonth() + 1}월 ${d.getDate()}일 (${DAY_KO[d.getDay()]})`;
 };
 
+/** Date → "10월 1일 (목)". 홈 상단처럼 자리가 좁을 때 */
+export const todayKoShort = (d = new Date()) => `${d.getMonth() + 1}월 ${d.getDate()}일 (${DAY_KO[d.getDay()]})`;
+
 /** Date → "2026년 10월 1일 목요일" */
 export const todayKo = (d = new Date()) => `${d.getFullYear()}년 ${d.getMonth() + 1}월 ${d.getDate()}일 ${DAY_KO[d.getDay()]}요일`;
 
