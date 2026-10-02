@@ -21,7 +21,7 @@ export const screen = {
 
 /** 그림자 - RN 0.76+ / web 공통 boxShadow 문자열 */
 export const shadow = {
-  card: '0 1px 2px rgba(21, 23, 29, 0.04), 0 6px 20px rgba(21, 23, 29, 0.06)',
+  card: '0 1px 2px rgba(21, 23, 29, 0.03), 0 3px 10px rgba(21, 23, 29, 0.04)',
   float: '0 8px 28px rgba(21, 23, 29, 0.12)',
   primary: '0 10px 24px rgba(240, 80, 30, 0.28)',
 } as const;

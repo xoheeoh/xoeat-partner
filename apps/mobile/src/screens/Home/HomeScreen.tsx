@@ -6,7 +6,7 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import Toast from 'react-native-toast-message';
 
 import type { RootStackParamList } from '@typ/navigation';
-import type { DashboardSummary } from '@typ/domain';
+import type { DailySales, DashboardSummary } from '@typ/domain';
 import { getDashboard } from '@apis/storeApi';
 import { createDemoOrder } from '@apis/orderApi';
 import { isOk } from '@apis/client';
@@ -15,7 +15,7 @@ import { useOrderFeed } from '@contexts/OrderFeedContext';
 import { useDialog } from '@contexts/DialogContext';
 import { loadingController } from '@utils/loadingController';
 import { todayKo, won } from '@utils/formatter';
-import { WeekSalesChart } from '@components/home';
+import { MonthSalesChart } from '@components/home';
 import { PrimaryButton, ScreenWrapper, Skeleton, Typography } from '@components/common';
 import { theme } from '@styles';
 
@@ -28,7 +28,14 @@ const QUICK_MENUS: { label: string; icon: IconName; route: keyof RootStackParamL
   { label: '운영 설정', icon: 'tune-variant', route: 'OperationSetting' },
 ];
 
-/** 홈: 영업 상태, 오늘 주문 현황, 7일 매출 추이, 바로가기, 데모 주문 버튼 */
+/** 서버 마이그레이션(monthDays) 반영 전의 옛 응답(week: 최근 7일)도 이번 달 날짜만 골라 쓴다. 반영 후 제거 */
+const monthDaysOf = (summary: DashboardSummary): DailySales[] => {
+  if (summary.monthDays) return summary.monthDays;
+  const month = new Date().getMonth();
+  return (summary.week ?? []).filter((d) => new Date(`${d.date}T00:00:00`).getMonth() === month);
+};
+
+/** 홈: 영업 상태, 오늘 주문 현황, 오늘·이번 달 매출(주 단위 추이), 바로가기, 데모 주문 버튼 */
 const HomeScreen = () => {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const { store, setStatus, refresh } = useStore();
@@ -189,19 +196,24 @@ const HomeScreen = () => {
           </View>
           {summary ? (
             <>
-              <View style={styles.salesRow}>
-                <View style={{ flex: 1 }}>
-                  <Typography mode="caption1" color="gray500">
-                    오늘
-                  </Typography>
-                  <Typography mode="heading3" color="orange600">
-                    {won(summary.today.sales)}
-                  </Typography>
-                </View>
-                <View style={{ flex: 1 }}>
-                  <Typography mode="caption1" color="gray500">
-                    이번 달
-                  </Typography>
+              {/* 오늘: 금액만 크게 */}
+              <View>
+                <Typography mode="caption1" color="gray500">
+                  오늘
+                </Typography>
+                <Typography mode="heading2" color="orange600">
+                  {won(summary.today.sales)}
+                </Typography>
+              </View>
+
+              <View style={styles.divider} />
+
+              {/* 이번 달: 금액 + 주 단위 추이 */}
+              <View style={styles.monthHead}>
+                <Typography mode="caption1" color="gray500">
+                  이번 달
+                </Typography>
+                <View style={styles.monthAmountRow}>
                   <Typography mode="heading3" color="gray900">
                     {won(summary.month.sales)}
                   </Typography>
@@ -210,12 +222,13 @@ const HomeScreen = () => {
                   </Typography>
                 </View>
               </View>
-              <WeekSalesChart data={summary.week} />
+              <MonthSalesChart days={monthDaysOf(summary)} />
             </>
           ) : (
             <View style={{ gap: 10 }}>
+              <Skeleton width="50%" height={32} />
               <Skeleton width="60%" height={28} />
-              <Skeleton width="100%" height={120} />
+              <Skeleton width="100%" height={100} />
             </View>
           )}
         </View>
@@ -223,11 +236,14 @@ const HomeScreen = () => {
         {/* 바로가기 */}
         <View style={styles.quickRow}>
           {QUICK_MENUS.map((m) => (
-            <Pressable key={m.route} style={styles.quick} onPress={() => navigation.navigate(m.route as never)}>
+            <Pressable
+              key={m.route}
+              style={({ pressed }) => [styles.quick, pressed && styles.quickPressed]}
+              onPress={() => navigation.navigate(m.route as never)}>
               <View style={styles.quickIcon}>
                 <MaterialCommunityIcons name={m.icon} size={22} color={theme.colors.orange600} />
               </View>
-              <Typography mode="caption1" color="gray700">
+              <Typography mode="caption1" color="gray800">
                 {m.label}
               </Typography>
             </Pressable>
@@ -274,13 +290,27 @@ const styles = StyleSheet.create({
   statsRow: { flexDirection: 'row', gap: 10 },
   stat: { flex: 1, backgroundColor: theme.colors.white, borderRadius: theme.radius.lg, padding: 14, gap: 2, boxShadow: theme.shadow.card },
   statHot: { backgroundColor: theme.colors.primary },
-  card: { backgroundColor: theme.colors.white, borderRadius: theme.radius.lg, padding: 16, gap: 14, boxShadow: theme.shadow.card },
+  // 매출 카드는 키가 커서 그림자 번짐이 과해 보이므로 그림자 없이 흰 배경만으로 구분한다
+  card: { backgroundColor: theme.colors.white, borderRadius: theme.radius.lg, padding: 16, gap: 14 },
   cardHead: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   more: { flexDirection: 'row', alignItems: 'center' },
-  salesRow: { flexDirection: 'row', gap: 12 },
+  divider: { height: 1, backgroundColor: theme.colors.line },
+  monthHead: { gap: 2 },
+  monthAmountRow: { flexDirection: 'row', alignItems: 'baseline', gap: 8 },
   quickRow: { flexDirection: 'row', gap: 8 },
-  quick: { flex: 1, alignItems: 'center', gap: 6, paddingVertical: 12, backgroundColor: theme.colors.white, borderRadius: theme.radius.lg, boxShadow: theme.shadow.card },
-  quickIcon: { width: 40, height: 40, borderRadius: 20, backgroundColor: theme.colors.orange50, alignItems: 'center', justifyContent: 'center' },
+  // 바로가기는 위의 정보 카드(흰 배경+그림자)와 구분되도록 연한 주황 배경 + 테두리로 "눌리는 버튼" 느낌을 준다
+  quick: {
+    flex: 1,
+    alignItems: 'center',
+    gap: 6,
+    paddingVertical: 12,
+    backgroundColor: theme.colors.orange50,
+    borderRadius: theme.radius.lg,
+    borderWidth: 1,
+    borderColor: theme.colors.orange100,
+  },
+  quickPressed: { backgroundColor: theme.colors.orange100, borderColor: theme.colors.orange200 },
+  quickIcon: { width: 40, height: 40, borderRadius: 20, backgroundColor: theme.colors.white, alignItems: 'center', justifyContent: 'center' },
   demoBox: {
     flexDirection: 'row',
     alignItems: 'center',
