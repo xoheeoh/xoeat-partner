@@ -154,7 +154,16 @@ export interface Order {
 export interface DashboardSummary {
   today: { sales: number; orderCount: number; pending: number; inProgress: number };
   month: { sales: number; orderCount: number };
-  week: Array<{ date: string; sales: number; orderCount: number }>;
+  /** 이번 달 1일 ~ 오늘, 하루 한 줄 */
+  monthDays: DailySales[];
+  /** @deprecated 예전 서버(최근 7일)가 내려주던 값. 서버 마이그레이션 반영 후 제거 */
+  week?: DailySales[];
+}
+
+export interface DailySales {
+  date: string; // yyyy-MM-dd
+  sales: number;
+  orderCount: number;
 }
 
 export interface Settlement {

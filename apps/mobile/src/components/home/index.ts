@@ -1,1 +1,1 @@
-export { WeekSalesChart } from './WeekSalesChart';
+export { MonthSalesChart } from './MonthSalesChart';

@@ -102,7 +102,7 @@ begin
   perform pg_temp.check('영업 재개', (select status from public.stores) = 'OPEN');
 
   -- 대시보드
-  perform pg_temp.check('대시보드: 7일 추이는 7개', json_array_length(public.dashboard_summary()->'week') = 7);
+  perform pg_temp.check('대시보드: 이번 달 날짜별 매출은 1일~오늘 개수', json_array_length(public.dashboard_summary()->'monthDays') = extract(day from (now() at time zone 'Asia/Seoul'))::int);
   perform pg_temp.check('대시보드: 오늘 매출 ≥ 0', (public.dashboard_summary()->'today'->>'sales')::int >= 0);
 
   -- ── 메뉴 CRUD (직접 쓰기 + RLS) ──────────────────────────────────
