@@ -159,9 +159,15 @@ const HomeScreen = () => {
         {/* 영업 상태 토글 */}
         {paused ? (
           <View style={styles.pausedBox}>
-            <Typography mode="body2" color="yellow900" style={{ flex: 1 }}>
-              영업 일시중지 상태예요. 새 주문이 들어오지 않습니다.
-            </Typography>
+            {/* 제목 + 설명 두 줄. 운영 설정 화면의 영업 상태 카드와 같은 구성이라 버튼(44px) 높이와도 균형이 맞는다 */}
+            <View style={{ flex: 1, gap: 2 }}>
+              <Typography mode="subtitle2" color="yellow900">
+                영업 일시중지 중
+              </Typography>
+              <Typography mode="caption1" color="yellow900">
+                새 주문이 들어오지 않아요
+              </Typography>
+            </View>
             <PrimaryButton label="영업 재개" size="md" onPress={toggleStatus} />
           </View>
         ) : (
