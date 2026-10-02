@@ -23,6 +23,8 @@ export const screen = {
 export const shadow = {
   card: '0 1px 2px rgba(21, 23, 29, 0.03), 0 3px 10px rgba(21, 23, 29, 0.04)',
   float: '0 8px 28px rgba(21, 23, 29, 0.12)',
+  /** 화면 아래에 붙는 바(하단 탭바 등). 위쪽으로 퍼져 내용과 구분선 없이 나뉘게 한다 */
+  bar: '0 -2px 12px rgba(21, 23, 29, 0.06)',
   primary: '0 10px 24px rgba(240, 80, 30, 0.28)',
 } as const;
 
