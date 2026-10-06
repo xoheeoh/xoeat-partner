@@ -1,11 +1,12 @@
-import { StyleSheet, Text, View, ViewStyle } from 'react-native';
+import { StyleProp, StyleSheet, Text, View, ViewStyle } from 'react-native';
 
 import { theme } from '@styles';
 
 interface AdultBadgeProps {
   /** 지름(px). 글자 크기와 테두리 두께는 지름에 맞춰 따라간다 */
   size?: number;
-  style?: ViewStyle;
+  /** 배열도 받는다 (예: [위치 보정, 흐리게]) */
+  style?: StyleProp<ViewStyle>;
 }
 
 /**

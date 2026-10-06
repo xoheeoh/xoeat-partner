@@ -6,7 +6,7 @@ import Toast from 'react-native-toast-message';
 
 import type { RootStackParamList } from '@typ/navigation';
 import type { Menu, OptionGroupInput } from '@typ/domain';
-import { createOptionGroup, getMenus, getOptionGroup, updateOptionGroup } from '@apis/menuApi';
+import { createOptionGroup, deleteOptionGroup, getMenus, getOptionGroup, updateOptionGroup } from '@apis/menuApi';
 import { isOk } from '@apis/client';
 import { useStore } from '@contexts/StoreContext';
 import { useDialog } from '@contexts/DialogContext';
@@ -38,7 +38,7 @@ const COUNT_OPTIONS = ['1', '2', '3', '4', '5'];
 const OptionGroupEditScreen: React.FC<Props> = ({ navigation, route }) => {
   const groupId = route.params?.groupId;
   const { store } = useStore();
-  const { alert } = useDialog();
+  const { alert, confirm } = useDialog();
 
   const [name, setName] = useState('');
   const [required, setRequired] = useState(true);
@@ -61,6 +61,30 @@ const OptionGroupEditScreen: React.FC<Props> = ({ navigation, route }) => {
   const applyMenuDraft = () => {
     setMenuIds(menuDraft);
     setMenuSheet(false);
+  };
+
+  /** 수정 화면 맨 아래의 삭제. 되돌리기 어려운 동작이라 주 버튼(수정 완료)과 떨어뜨려 두고 확인을 거친다 */
+  const removeGroup = async () => {
+    if (!groupId || saving) return;
+    const yes = await confirm({
+      title: '옵션 그룹 삭제',
+      message1: `'${name}' 그룹을 삭제할까요?`,
+      message2: menuIds.length ? `연결된 메뉴 ${menuIds.length}개에서 이 옵션이 사라집니다.` : undefined,
+      confirmText: '삭제',
+      cancelText: '취소',
+    });
+    if (!yes) return;
+    setSaving(true);
+    loadingController.start();
+    const res = await deleteOptionGroup(groupId);
+    loadingController.stop();
+    setSaving(false);
+    if (!isOk(res)) {
+      Toast.show({ type: 'error', text1: '삭제하지 못했어요', text2: res.resultMsg });
+      return;
+    }
+    Toast.show({ type: 'success', text1: '옵션 그룹을 삭제했어요' });
+    navigation.goBack();
   };
 
   useEffect(() => {
@@ -237,6 +261,16 @@ const OptionGroupEditScreen: React.FC<Props> = ({ navigation, route }) => {
             )}
           </View>
         </View>
+
+        {/* 삭제는 내용 맨 아래에 글자 버튼으로. 등록 화면에는 지울 게 없으니 보이지 않는다 */}
+        {groupId && (
+          <Pressable onPress={removeGroup} disabled={saving} style={({ pressed }) => [styles.deleteBtn, pressed && { opacity: 0.5 }]} accessibilityRole="button">
+            <MaterialCommunityIcons name="trash-can-outline" size={16} color={theme.colors.red600} />
+            <Typography mode="subtitle4" color="red600">
+              이 옵션 그룹 삭제
+            </Typography>
+          </Pressable>
+        )}
       </KeyboardAwareScrollView>
 
       <BottomBtnBox label={groupId ? '수정 완료' : '등록하기'} onPress={save} disabled={!valid || saving} />
@@ -316,6 +350,7 @@ const styles = StyleSheet.create({
   linkBtn: { flexDirection: 'row', alignItems: 'center' },
   menuChips: { flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginTop: 8 },
   menuPickLabel: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  deleteBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 4, alignSelf: 'center', paddingVertical: 10, paddingHorizontal: 16, marginTop: 8 },
 });
 
 export default OptionGroupEditScreen;
