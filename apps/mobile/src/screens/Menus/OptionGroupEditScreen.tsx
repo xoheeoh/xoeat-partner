@@ -52,6 +52,16 @@ const OptionGroupEditScreen: React.FC<Props> = ({ navigation, route }) => {
 
   const [optSheet, setOptSheet] = useState<{ key: string | null; name: string; priceText: string } | null>(null);
   const [menuSheet, setMenuSheet] = useState(false);
+  // 시트 안에서 고르는 임시 선택. "N개 선택 완료"를 눌러야 menuIds 에 반영되고, X·끌어내리기로 닫으면 버려진다
+  const [menuDraft, setMenuDraft] = useState<string[]>([]);
+  const openMenuSheet = () => {
+    setMenuDraft(menuIds);
+    setMenuSheet(true);
+  };
+  const applyMenuDraft = () => {
+    setMenuIds(menuDraft);
+    setMenuSheet(false);
+  };
 
   useEffect(() => {
     (async () => {
@@ -179,12 +189,13 @@ const OptionGroupEditScreen: React.FC<Props> = ({ navigation, route }) => {
           </View>
           <View style={{ gap: 8, marginTop: 8 }}>
             {options.map((o, i) => (
-              <View key={o.key} style={styles.optRow}>
+              // 품절이면 줄 전체를 회색으로 가라앉히고 이름에 취소선을 그어 꺼진 항목임이 바로 보이게 한다. 오른쪽 "품절" 스위치 라벨이 이미 있어 배지는 두지 않는다
+              <View key={o.key} style={[styles.optRow, o.soldOut && styles.optRowOff]}>
                 <Pressable style={{ flex: 1 }} onPress={() => setOptSheet({ key: o.key, name: o.name, priceText: o.price ? comma(o.price) : '' })}>
-                  <Typography mode="subtitle3" color={o.soldOut ? 'gray400' : 'gray900'}>
+                  <Typography mode="subtitle3" color={o.soldOut ? 'gray400' : 'gray900'} style={o.soldOut ? styles.strike : undefined}>
                     {o.name}
                   </Typography>
-                  <Typography mode="caption1" color="gray500">
+                  <Typography mode="caption1" color={o.soldOut ? 'gray400' : 'gray500'}>
                     {o.price ? `+${won(o.price)}` : '추가 금액 없음'}
                   </Typography>
                 </Pressable>
@@ -209,7 +220,7 @@ const OptionGroupEditScreen: React.FC<Props> = ({ navigation, route }) => {
             <Typography mode="subtitle3" color="gray700">
               연결된 메뉴
             </Typography>
-            <Pressable onPress={() => setMenuSheet(true)} style={styles.linkBtn}>
+            <Pressable onPress={openMenuSheet} style={styles.linkBtn}>
               <Typography mode="subtitle4" color="orange700">
                 메뉴 선택
               </Typography>
@@ -262,19 +273,20 @@ const OptionGroupEditScreen: React.FC<Props> = ({ navigation, route }) => {
         setVisible={setMenuSheet}
         title="메뉴 연결"
         content={
-          <View style={{ gap: 4 }}>
+          // 줄 간격을 넉넉히 두고, 카테고리는 글자 대신 배지로 붙여 메뉴 이름과 한 단어로 읽히지 않게 한다
+          <View style={{ gap: 14 }}>
             {menus.map((m) => (
               <CheckBox
                 key={m.id}
-                isChecked={menuIds.includes(m.id)}
-                setIsChecked={() => setMenuIds(menuIds.includes(m.id) ? menuIds.filter((id) => id !== m.id) : [...menuIds, m.id])}
+                isChecked={menuDraft.includes(m.id)}
+                setIsChecked={() => setMenuDraft(menuDraft.includes(m.id) ? menuDraft.filter((id) => id !== m.id) : [...menuDraft, m.id])}
                 labelComponent={
-                  <Typography mode="body2" color="gray900">
-                    {m.name}{' '}
-                    <Typography mode="caption1" color="gray500">
-                      {m.categoryName ?? '미분류'}
+                  <View style={styles.menuPickLabel}>
+                    <Typography mode="body2" color="gray900" numberOfLines={1} style={{ flexShrink: 1 }}>
+                      {m.name}
                     </Typography>
-                  </Typography>
+                    <Badge label={m.categoryName ?? '미분류'} tone="gray" size="small" />
+                  </View>
                 }
               />
             ))}
@@ -283,6 +295,8 @@ const OptionGroupEditScreen: React.FC<Props> = ({ navigation, route }) => {
                 등록된 메뉴가 없어요.
               </Typography>
             )}
+            {/* 이 버튼을 눌러야 임시 선택이 반영된다. X·끌어내리기로 닫으면 바뀌지 않는다 */}
+            <PrimaryButton label={menuDraft.length > 0 ? `${menuDraft.length}개 선택 완료` : '선택 완료'} size="lg" onPress={applyMenuDraft} style={{ marginTop: 6 }} />
           </View>
         }
       />
@@ -295,9 +309,13 @@ const styles = StyleSheet.create({
   twoCol: { flexDirection: 'row', gap: 12 },
   rowBetween: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   optRow: { flexDirection: 'row', alignItems: 'center', gap: 12, padding: 12, borderRadius: theme.radius.md, borderWidth: 1, borderColor: theme.colors.line },
-  optCtl: { alignItems: 'center', gap: 2 },
+  optRowOff: { backgroundColor: theme.colors.gray100, borderColor: theme.colors.gray150 },
+  strike: { textDecorationLine: 'line-through' },
+  // "품절" 글자와 스위치를 가로로 나란히
+  optCtl: { flexDirection: 'row', alignItems: 'center', gap: 6 },
   linkBtn: { flexDirection: 'row', alignItems: 'center' },
   menuChips: { flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginTop: 8 },
+  menuPickLabel: { flexDirection: 'row', alignItems: 'center', gap: 8 },
 });
 
 export default OptionGroupEditScreen;
