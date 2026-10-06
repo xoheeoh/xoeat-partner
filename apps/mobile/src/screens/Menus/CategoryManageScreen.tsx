@@ -10,15 +10,18 @@ import { isOk } from '@apis/client';
 import { useStore } from '@contexts/StoreContext';
 import { useDialog } from '@contexts/DialogContext';
 import { loadingController } from '@utils/loadingController';
-import { BOTTOM_BTN_BOX_HEIGHT, BottomBtnBox, BottomSheet, InfoBox, KeyboardAwareScrollView, PrimaryButton, ScreenWrapper, TextField, Typography } from '@components/common';
+import { Badge, BOTTOM_BTN_BOX_HEIGHT, BottomBtnBox, BottomSheet, InfoBox, KeyboardAwareScrollView, PrimaryButton, ScreenWrapper, SortableList, TextField, Typography } from '@components/common';
 import { theme } from '@styles';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'CategoryManage'>;
 type Item = { id?: string; name: string; key: string };
 
+/** 드래그 위치 계산을 위해 모든 줄의 높이를 같게 둔다 */
+const ROW_HEIGHT = 56;
+
 /**
  * 카테고리 추가·이름 변경·순서 변경·삭제를 화면에서 모아 두었다가 저장 버튼 한 번에 반영한다.
- * 순서는 위/아래 버튼으로 바꾼다 (드래그 라이브러리 없이 웹·네이티브 동일 동작).
+ * 순서는 왼쪽 손잡이(≡)를 잡고 끌어서 바꾼다 (SortableList).
  */
 const CategoryManageScreen: React.FC<Props> = ({ navigation }) => {
   const { store } = useStore();
@@ -28,6 +31,8 @@ const CategoryManageScreen: React.FC<Props> = ({ navigation }) => {
   const [original, setOriginal] = useState<string>('');
   const [editing, setEditing] = useState<{ index: number | null; name: string } | null>(null);
   const [saving, setSaving] = useState(false);
+  // 드래그 중에는 화면 스크롤을 잠가 손가락이 줄과 화면을 동시에 움직이지 않게 한다
+  const [dragging, setDragging] = useState(false);
 
   useEffect(() => {
     getCategories().then((res) => {
@@ -39,11 +44,12 @@ const CategoryManageScreen: React.FC<Props> = ({ navigation }) => {
 
   const dirty = JSON.stringify(items) !== original || removed.length > 0;
 
-  const move = (i: number, dir: -1 | 1) => {
-    const j = i + dir;
-    if (j < 0 || j >= items.length) return;
+  /** from 번째 줄을 빼서 to 번째에 끼워 넣는다 */
+  const reorder = (from: number, to: number) => {
+    if (from === to) return;
     const next = [...items];
-    [next[i], next[j]] = [next[j], next[i]];
+    const [moved] = next.splice(from, 1);
+    next.splice(to, 0, moved);
     setItems(next);
   };
 
@@ -87,38 +93,35 @@ const CategoryManageScreen: React.FC<Props> = ({ navigation }) => {
 
   return (
     <ScreenWrapper backgroundColor="white" keyboardBottomInset={BOTTOM_BTN_BOX_HEIGHT}>
-      <KeyboardAwareScrollView contentContainerStyle={styles.container} keyboardAccessoryHeight={BOTTOM_BTN_BOX_HEIGHT}>
-        <InfoBox>고객 앱의 메뉴판은 이 순서대로 보여요. 화살표로 순서를 바꾸고 저장을 눌러 주세요.</InfoBox>
+      <KeyboardAwareScrollView contentContainerStyle={styles.container} keyboardAccessoryHeight={BOTTOM_BTN_BOX_HEIGHT} scrollEnabled={!dragging}>
+        <InfoBox>고객 앱의 메뉴판은 이 순서대로 보여요. 왼쪽 손잡이를 잡고 끌어 순서를 바꾸고 저장을 눌러 주세요.</InfoBox>
 
         <View style={styles.list}>
-          {items.map((it, i) => (
-            <View key={it.key} style={styles.row}>
-              <View style={styles.arrows}>
-                <Pressable onPress={() => move(i, -1)} disabled={i === 0} hitSlop={6}>
-                  <MaterialCommunityIcons name="chevron-up" size={22} color={i === 0 ? theme.colors.gray200 : theme.colors.gray600} />
+          <SortableList
+            data={items}
+            keyOf={(it) => it.key}
+            rowHeight={ROW_HEIGHT}
+            onReorder={reorder}
+            onDragChange={setDragging}
+            renderItem={(it, i, handle) => (
+              <View style={styles.row}>
+                {handle}
+                <Pressable style={styles.nameArea} onPress={() => setEditing({ index: i, name: it.name })}>
+                  <Typography mode="subtitle2" color="gray900" numberOfLines={1} style={{ flexShrink: 1 }}>
+                    {it.name}
+                  </Typography>
+                  {/* 줄 높이를 같게 유지하려고 두 번째 줄 대신 배지로 표시한다 */}
+                  {!it.id && <Badge label="저장 전" tone="orange" size="small" />}
                 </Pressable>
-                <Pressable onPress={() => move(i, 1)} disabled={i === items.length - 1} hitSlop={6}>
-                  <MaterialCommunityIcons name="chevron-down" size={22} color={i === items.length - 1 ? theme.colors.gray200 : theme.colors.gray600} />
+                <Pressable onPress={() => setEditing({ index: i, name: it.name })} hitSlop={8} style={styles.iconBtn}>
+                  <MaterialCommunityIcons name="pencil-outline" size={20} color={theme.colors.gray500} />
+                </Pressable>
+                <Pressable onPress={() => remove(i)} hitSlop={8} style={styles.iconBtn}>
+                  <MaterialCommunityIcons name="trash-can-outline" size={20} color={theme.colors.red500} />
                 </Pressable>
               </View>
-              <Pressable style={{ flex: 1 }} onPress={() => setEditing({ index: i, name: it.name })}>
-                <Typography mode="subtitle2" color="gray900">
-                  {it.name}
-                </Typography>
-                {!it.id && (
-                  <Typography mode="caption1" color="orange700">
-                    새 카테고리 (저장 전)
-                  </Typography>
-                )}
-              </Pressable>
-              <Pressable onPress={() => setEditing({ index: i, name: it.name })} hitSlop={8} style={styles.iconBtn}>
-                <MaterialCommunityIcons name="pencil-outline" size={20} color={theme.colors.gray500} />
-              </Pressable>
-              <Pressable onPress={() => remove(i)} hitSlop={8} style={styles.iconBtn}>
-                <MaterialCommunityIcons name="trash-can-outline" size={20} color={theme.colors.red500} />
-              </Pressable>
-            </View>
-          ))}
+            )}
+          />
           {items.length === 0 && (
             <Typography mode="body2" color="gray500" style={{ textAlign: 'center', paddingVertical: 24 }}>
               카테고리가 없어요
@@ -149,10 +152,11 @@ const CategoryManageScreen: React.FC<Props> = ({ navigation }) => {
 };
 
 const styles = StyleSheet.create({
-  container: { padding: 20, gap: 16 },
-  list: { gap: 4 },
-  row: { flexDirection: 'row', alignItems: 'center', gap: 8, paddingVertical: 10, borderBottomWidth: 1, borderBottomColor: theme.colors.gray100 },
-  arrows: { alignItems: 'center' },
+  container: { padding: 20, paddingTop: 0, gap: 16 },
+  list: {},
+  // 줄 높이는 SortableList 가 ROW_HEIGHT 로 고정한다. 여기서는 가로 배치와 구분선만
+  row: { flex: 1, flexDirection: 'row', alignItems: 'center', gap: 4, borderBottomWidth: 1, borderBottomColor: theme.colors.gray100 },
+  nameArea: { flex: 1, flexDirection: 'row', alignItems: 'center', gap: 8 },
   iconBtn: { width: 36, height: 36, alignItems: 'center', justifyContent: 'center' },
 });
 
