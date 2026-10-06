@@ -7,7 +7,7 @@ import Toast from 'react-native-toast-message';
 
 import type { RootStackParamList } from '@typ/navigation';
 import type { Menu, MenuCategory, OptionGroup, SaleStatus } from '@typ/domain';
-import { deleteMenu, deleteOptionGroup, getCategories, getMenus, getOptionGroups, setMenuSaleStatus } from '@apis/menuApi';
+import { deleteMenu, getCategories, getMenus, getOptionGroups, setMenuSaleStatus } from '@apis/menuApi';
 import { isOk } from '@apis/client';
 import { useDialog } from '@contexts/DialogContext';
 import { SALE_STATUS } from '@dt/constants';
@@ -101,37 +101,41 @@ const MenuList: React.FC<{ nav: Nav }> = ({ nav }) => {
           keyExtractor={(m) => m.id}
           contentContainerStyle={styles.list}
           ItemSeparatorComponent={() => <View style={styles.sep} />}
-          renderItem={({ item }) => (
-            <Pressable style={styles.menuRow} onPress={() => nav.navigate('MenuEdit', { menuId: item.id })}>
-              {item.imageUrl ? (
-                <Image source={{ uri: item.imageUrl }} style={styles.thumb} />
-              ) : (
-                <View style={[styles.thumb, styles.thumbEmpty]}>
-                  <MaterialCommunityIcons name="image-outline" size={22} color={theme.colors.gray300} />
-                </View>
-              )}
-              <View style={{ flex: 1, gap: 3 }}>
-                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-                  <Typography mode="subtitle2" color={item.saleStatus === 'HIDDEN' ? 'gray400' : 'gray900'} numberOfLines={1} style={{ flexShrink: 1 }}>
-                    {item.name}
+          renderItem={({ item }) => {
+            // 숨김 메뉴는 사진·이름·설명·가격·19 마크 묶음을 투명도로 균일하게 가라앉힌다. 배경은 건드리지 않고, 상태 버튼은 되돌리는 조작이라 그대로 둔다
+            const hidden = item.saleStatus === 'HIDDEN';
+            return (
+              <Pressable style={styles.menuRow} onPress={() => nav.navigate('MenuEdit', { menuId: item.id })}>
+                {item.imageUrl ? (
+                  <Image source={{ uri: item.imageUrl }} style={[styles.thumb, hidden && styles.dimmed]} />
+                ) : (
+                  <View style={[styles.thumb, styles.thumbEmpty, hidden && styles.dimmed]}>
+                    <MaterialCommunityIcons name="image-outline" size={22} color={theme.colors.gray300} />
+                  </View>
+                )}
+                <View style={[{ flex: 1, gap: 3 }, hidden && styles.dimmed]}>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                    <Typography mode="subtitle2" color="gray900" numberOfLines={1} style={{ flexShrink: 1 }}>
+                      {item.name}
+                    </Typography>
+                    {/* 글자는 줄 상자 안에서 살짝 위로 보이므로 마크를 1px 올려 눈으로 보기에 가운데가 되게 한다 */}
+                    {item.adultOnly && <AdultBadge style={{ transform: [{ translateY: -1 }] }} />}
+                  </View>
+                  <Typography mode="caption1" color="gray500" numberOfLines={1}>
+                    {[item.categoryName ?? '미분류', item.standard].filter(Boolean).join(' · ')}
+                    {item.optionGroupIds.length ? ` · 옵션 ${item.optionGroupIds.length}그룹` : ''}
                   </Typography>
-                  {/* 글자는 줄 상자 안에서 살짝 위로 보이므로 마크를 1px 올려 눈으로 보기에 가운데가 되게 한다 */}
-                  {item.adultOnly && <AdultBadge style={{ transform: [{ translateY: -1 }] }} />}
+                  <Typography mode="subtitle3" color="gray900">
+                    {won(item.price)}
+                  </Typography>
                 </View>
-                <Typography mode="caption1" color="gray500" numberOfLines={1}>
-                  {[item.categoryName ?? '미분류', item.standard].filter(Boolean).join(' · ')}
-                  {item.optionGroupIds.length ? ` · 옵션 ${item.optionGroupIds.length}그룹` : ''}
-                </Typography>
-                <Typography mode="subtitle3" color="gray900">
-                  {won(item.price)}
-                </Typography>
-              </View>
-              <Pressable onPress={() => setStatusSheet(item)} hitSlop={8} style={styles.statusBtn}>
-                <Badge label={SALE_STATUS[item.saleStatus].label} tone={SALE_STATUS[item.saleStatus].tone} size="medium" />
-                <MaterialCommunityIcons name="chevron-down" size={16} color={theme.colors.gray500} />
+                <Pressable onPress={() => setStatusSheet(item)} hitSlop={8} style={styles.statusBtn}>
+                  <Badge label={SALE_STATUS[item.saleStatus].label} tone={SALE_STATUS[item.saleStatus].tone} size="medium" />
+                  <MaterialCommunityIcons name="chevron-down" size={16} color={theme.colors.gray500} />
+                </Pressable>
               </Pressable>
-            </Pressable>
-          )}
+            );
+          }}
           ListEmptyComponent={
             <View style={styles.empty}>
               <MaterialCommunityIcons name="food-off" size={40} color={theme.colors.gray300} />
@@ -180,7 +184,6 @@ const MenuList: React.FC<{ nav: Nav }> = ({ nav }) => {
 
 /* ── 옵션 탭 ──────────────────────────────────────────────────── */
 const OptionGroupList: React.FC<{ nav: Nav }> = ({ nav }) => {
-  const { confirm } = useDialog();
   const [groups, setGroups] = useState<OptionGroup[] | null>(null);
 
   useFocusEffect(
@@ -188,22 +191,6 @@ const OptionGroupList: React.FC<{ nav: Nav }> = ({ nav }) => {
       getOptionGroups().then((res) => setGroups(isOk(res) && res.groups ? res.groups : []));
     }, []),
   );
-
-  const remove = async (g: OptionGroup) => {
-    const yes = await confirm({
-      title: '옵션 그룹 삭제',
-      message1: `'${g.name}' 그룹을 삭제할까요?`,
-      message2: g.menuCount ? `연결된 메뉴 ${g.menuCount}개에서 이 옵션이 사라집니다.` : undefined,
-      confirmText: '삭제',
-      cancelText: '취소',
-    });
-    if (!yes) return;
-    const res = await deleteOptionGroup(g.id);
-    if (isOk(res)) {
-      setGroups((prev) => (prev ?? []).filter((x) => x.id !== g.id));
-      Toast.show({ type: 'success', text1: '옵션 그룹을 삭제했어요' });
-    } else Toast.show({ type: 'error', text1: res.resultMsg });
-  };
 
   return (
     <View style={{ flex: 1 }}>
@@ -218,7 +205,7 @@ const OptionGroupList: React.FC<{ nav: Nav }> = ({ nav }) => {
           contentContainerStyle={styles.list}
           ItemSeparatorComponent={() => <View style={styles.sep} />}
           renderItem={({ item }) => (
-            <Pressable style={styles.groupRow} onPress={() => nav.navigate('OptionGroupEdit', { groupId: item.id })} onLongPress={() => remove(item)}>
+            <Pressable style={styles.groupRow} onPress={() => nav.navigate('OptionGroupEdit', { groupId: item.id })}>
               <View style={{ flex: 1, gap: 4 }}>
                 <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
                   <Typography mode="subtitle2" color="gray900">
@@ -243,13 +230,6 @@ const OptionGroupList: React.FC<{ nav: Nav }> = ({ nav }) => {
                 등록된 옵션 그룹이 없어요
               </Typography>
             </View>
-          }
-          ListFooterComponent={
-            groups.length ? (
-              <Typography mode="caption1" color="gray400" style={{ textAlign: 'center', paddingVertical: 16 }}>
-                길게 누르면 삭제할 수 있어요
-              </Typography>
-            ) : null
           }
         />
       )}
@@ -284,6 +264,7 @@ const styles = StyleSheet.create({
   list: { paddingBottom: 90, flexGrow: 1 },
   sep: { height: 1, backgroundColor: theme.colors.gray100, marginLeft: 16 },
   menuRow: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingHorizontal: 16, paddingVertical: 12 },
+  dimmed: { opacity: 0.4 },
   thumb: { width: 64, height: 64, borderRadius: theme.radius.md, backgroundColor: theme.colors.gray100 },
   thumbEmpty: { alignItems: 'center', justifyContent: 'center' },
   statusBtn: { flexDirection: 'row', alignItems: 'center', gap: 2 },
