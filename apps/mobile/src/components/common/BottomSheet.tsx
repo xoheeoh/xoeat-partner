@@ -5,6 +5,7 @@ import {
   Modal,
   PanResponder,
   Platform,
+  ScrollView,
   StyleSheet,
   TouchableWithoutFeedback,
   View,
@@ -23,6 +24,9 @@ const DRAG_START_DISTANCE = 5; // 이 거리(px)보다 적게 움직이면 탭�
 
 // 시트 내용물(버튼 등) 아래에 안전 영역 위로 더하는 여백. 안드로이드는 제스처 막대가 이미 공간을 차지해 BottomBtnBox 와 같은 12 로 둔다
 const SHEET_BOTTOM_GAP = Platform.select({ android: 12, default: 24 }) as number;
+
+// 시트가 화면에서 차지할 수 있는 최대 높이 비율. 이보다 길어지는 내용은 안에서 스크롤된다
+const SHEET_MAX_HEIGHT = '85%';
 
 /**
  * 핸들·헤더 같은 전용 드래그 구역에 붙여서 아래로 끌어내리면 닫히게 하는 제스처 핸들러를 만든다.
@@ -75,7 +79,7 @@ interface SimpleBottomSheetProps {
   content: ReactNode;
 }
 
-// 스크롤 없는 BottomSheet (짧은 내용)
+// 기본 BottomSheet. 내용이 짧으면 내용 높이만큼, 길면 화면의 SHEET_MAX_HEIGHT 까지 커지고 그 안에서 스크롤된다
 const SimpleBottomSheet: React.FC<SimpleBottomSheetProps> = ({ visible, setVisible, title, content }) => {
   const screenHeight = Dimensions.get('screen').height;
   const panY = useRef(new Animated.Value(screenHeight)).current;
@@ -142,9 +146,15 @@ const SimpleBottomSheet: React.FC<SimpleBottomSheetProps> = ({ visible, setVisib
             </View>
           </View>
 
-          {/* 콘텐츠 영역 */}
+          {/* 콘텐츠 영역: 시트 높이 상한을 넘는 내용은 여기서 스크롤된다. 끌어내려 닫는 제스처는 위의 손잡이·헤더에만 있어 스크롤과 겹치지 않는다 */}
           {/* 내용물 아래 여백은 시트가 한 곳에서 책임진다. 안전 영역(제스처 막대·홈 인디케이터) 위에 SHEET_BOTTOM_GAP 만 더한다 */}
-          <View style={[styles.content, { paddingBottom: insets.bottom + SHEET_BOTTOM_GAP }]}>{content}</View>
+          <ScrollView
+            style={styles.scrollArea}
+            contentContainerStyle={[styles.content, { paddingBottom: insets.bottom + SHEET_BOTTOM_GAP }]}
+            keyboardShouldPersistTaps="handled"
+            showsVerticalScrollIndicator={false}>
+            {content}
+          </ScrollView>
         </Animated.View>
       </View>
     </Modal>
@@ -159,6 +169,7 @@ const styles = StyleSheet.create({
     borderTopLeftRadius: theme.radius.xxl,
     borderTopRightRadius: theme.radius.xxl,
     width: '100%',
+    maxHeight: SHEET_MAX_HEIGHT,
     // 웹: 시트를 700px 프레임 폭에 맞춰 중앙 정렬하고, 드래그 중 글자 선택으로 제스처가 끊기지 않게 userSelect 를 막는다
     ...(Platform.OS === 'web'
       ? { maxWidth: WEB_MAX_WIDTH, alignSelf: 'center' as const, userSelect: 'none' as const }
@@ -183,10 +194,8 @@ const styles = StyleSheet.create({
   },
   title: { flex: 1 },
   closeBtn: { margin: 0, width: 36, height: 36, borderRadius: 18 },
-  scrollArea: {
-    flex: 1,
-    maxHeight: '100%',
-  },
+  // flexGrow 0 + flexShrink 1: 내용이 짧으면 그만큼만 차지하고, 시트 상한에 닿으면 줄어들며 스크롤이 생긴다
+  scrollArea: { flexGrow: 0, flexShrink: 1 },
   content: { paddingHorizontal: 20 },
 });
 
