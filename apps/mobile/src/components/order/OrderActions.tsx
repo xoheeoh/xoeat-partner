@@ -5,7 +5,6 @@ import Toast from 'react-native-toast-message';
 import { acceptOrder, advanceOrder, cancelOrder, rejectOrder } from '@apis/orderApi';
 import { isOk } from '@apis/client';
 import { useDialog } from '@contexts/DialogContext';
-import { useStore } from '@contexts/StoreContext';
 import { COOKING_MINUTES, REJECT_REASONS } from '@dt/constants';
 import { loadingController } from '@utils/loadingController';
 import type { Order } from '@typ/domain';
@@ -25,7 +24,6 @@ interface OrderActionsProps {
  * 상태 전이 규칙은 서버(advance_order 등)가 가지고, 여기서는 어떤 버튼을 보여 줄지만 정한다.
  */
 const OrderActions: React.FC<OrderActionsProps> = ({ order, onChanged, size = 'md' }) => {
-  const { store } = useStore();
   const { confirm } = useDialog();
   const [acceptSheet, setAcceptSheet] = useState(false);
   const [reasonSheet, setReasonSheet] = useState<null | 'reject' | 'cancel'>(null);
@@ -59,11 +57,8 @@ const OrderActions: React.FC<OrderActionsProps> = ({ order, onChanged, size = 'm
     else call(() => acceptOrder(order.id), '주문을 수락했어요. 조리를 시작해 주세요.');
   };
 
-  const acceptWith = async (opts: { cookingMinutes?: number; selfDelivery?: boolean }) => {
-    const ok = await call(
-      () => acceptOrder(order.id, opts),
-      opts.selfDelivery ? '주문을 수락했어요. 자체 배달로 진행합니다.' : `주문을 수락했어요. 예상 조리시간 ${opts.cookingMinutes}분`,
-    );
+  const acceptWith = async (cookingMinutes: number) => {
+    const ok = await call(() => acceptOrder(order.id, { cookingMinutes }), `주문을 수락했어요. 예상 조리시간 ${cookingMinutes}분`);
     if (ok) setAcceptSheet(false);
   };
 
@@ -127,18 +122,8 @@ const OrderActions: React.FC<OrderActionsProps> = ({ order, onChanged, size = 'm
             <Typography mode="body2" color="gray600" style={{ marginBottom: 6 }}>
               선택한 시간에 맞춰 배달 기사가 호출되고, 고객에게 도착 예정 시간이 안내됩니다.
             </Typography>
-            {store?.selfDelivery && (
-              <Pressable style={[styles.choice, styles.choiceSelf]} onPress={() => acceptWith({ selfDelivery: true })} disabled={busy}>
-                <Typography mode="subtitle2" color="orange700">
-                  자체 배달
-                </Typography>
-                <Typography mode="caption1" color="gray600">
-                  배달 호출 없이 직접 배달
-                </Typography>
-              </Pressable>
-            )}
             {COOKING_MINUTES.map((c) => (
-              <Pressable key={c.minutes} style={styles.choice} onPress={() => acceptWith({ cookingMinutes: c.minutes })} disabled={busy}>
+              <Pressable key={c.minutes} style={styles.choice} onPress={() => acceptWith(c.minutes)} disabled={busy}>
                 <Typography mode="subtitle2" color="gray900">
                   {c.label}
                 </Typography>
@@ -195,9 +180,7 @@ const nextStepOf = (o: Order): { label: string; doneMsg: string; color?: string;
     };
   }
   if (o.status === 'ACCEPTED' && o.orderType === 'DELIVERY') {
-    return o.selfDelivery
-      ? { label: '자체 배달 시작', doneMsg: '배달을 시작했어요.', color: theme.colors.purple600, confirmTitle: '자체 배달을 시작할까요?' }
-      : { label: '배달 기사에게 전달', doneMsg: '배달이 시작되었어요.', color: theme.colors.purple600, confirmTitle: '조리가 끝났나요?', confirmMsg: '배달 기사에게 음식을 전달한 뒤 눌러 주세요.' };
+    return { label: '배달 기사에게 전달', doneMsg: '배달이 시작되었어요.', color: theme.colors.purple600, confirmTitle: '조리가 끝났나요?', confirmMsg: '배달 기사에게 음식을 전달한 뒤 눌러 주세요.' };
   }
   if (o.status === 'READY') return { label: '고객 픽업 완료', doneMsg: '주문이 완료되었어요.', color: theme.colors.green600 };
   if (o.status === 'DELIVERING') return { label: '배달 완료', doneMsg: '주문이 완료되었어요.', color: theme.colors.green600, confirmTitle: '배달을 완료 처리할까요?' };
@@ -217,7 +200,6 @@ const styles = StyleSheet.create({
     backgroundColor: theme.colors.white,
     gap: 2,
   },
-  choiceSelf: { borderColor: theme.colors.orange200, backgroundColor: theme.colors.orange50 },
 });
 
 export default OrderActions;

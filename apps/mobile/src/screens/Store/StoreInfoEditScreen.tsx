@@ -15,7 +15,7 @@ import { useDialog } from '@contexts/DialogContext';
 import { STORE_CATEGORIES, categoryLabel } from '@dt/constants';
 import { comma, digitsToNumber } from '@utils/formatter';
 import { loadingController } from '@utils/loadingController';
-import { BOTTOM_BTN_BOX_HEIGHT, BottomBtnBox, Dropdown, KeyboardAwareScrollView, ScreenWrapper, TextField, Textarea, ToggleSwitch, Typography } from '@components/common';
+import { BOTTOM_BTN_BOX_HEIGHT, BottomBtnBox, Dropdown, KeyboardAwareScrollView, ScreenWrapper, TextField, Textarea, Typography } from '@components/common';
 import { theme } from '@styles';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'StoreInfoEdit'>;
@@ -33,10 +33,10 @@ const Label: React.FC<{ text: string; hint?: string }> = ({ text, hint }) => (
   </View>
 );
 
-/** 가게 정보 수정: 고객 앱에 보이는 소개·원산지·대표 이미지와 주문 조건(최소주문·배달비·자체배달) */
+/** 가게 정보 수정: 고객 앱에 보이는 소개·원산지·대표 이미지와 주문 조건(최소주문·배달비) */
 const StoreInfoEditScreen: React.FC<Props> = ({ navigation }) => {
   const { store, setStore } = useStore();
-  const { alert, confirm } = useDialog();
+  const { alert } = useDialog();
   const [form, setForm] = useState<StoreEditable>({
     name: store?.name ?? '',
     categoryCd: store?.categoryCd ?? 'KOREAN_FOOD',
@@ -48,7 +48,6 @@ const StoreInfoEditScreen: React.FC<Props> = ({ navigation }) => {
     deliveryFee: store?.deliveryFee ?? 0,
     deliveryEnabled: store?.deliveryEnabled ?? true,
     pickupEnabled: store?.pickupEnabled ?? true,
-    selfDelivery: store?.selfDelivery ?? false,
   });
   const [minText, setMinText] = useState(store?.minOrderAmount ? comma(store.minOrderAmount) : '');
   const [feeText, setFeeText] = useState(store?.deliveryFee ? comma(store.deliveryFee) : '');
@@ -71,20 +70,6 @@ const StoreInfoEditScreen: React.FC<Props> = ({ navigation }) => {
     setUploading(false);
     if (isOk(res) && res.imageUrl) set('imageUrl', res.imageUrl);
     else Toast.show({ type: 'error', text1: '이미지를 올리지 못했어요', text2: res.resultMsg });
-  };
-
-  const toggleSelfDelivery = async (v: boolean) => {
-    if (v) {
-      const yes = await confirm({
-        title: '자체 배달 사용',
-        message1: '배달 주문을 수락할 때 "자체 배달" 선택지가 생겨요.',
-        message2: '자체 배달로 수락한 주문은 배달 기사가 호출되지 않고, 가게에서 직접 배달 시작·완료를 눌러 처리합니다.',
-        confirmText: '사용',
-        cancelText: '취소',
-      });
-      if (!yes) return;
-    }
-    set('selfDelivery', v);
   };
 
   const valid = form.name.trim().length > 0;
@@ -151,13 +136,13 @@ const StoreInfoEditScreen: React.FC<Props> = ({ navigation }) => {
         <TextField id="phone" inputMode="tel" label="가게 전화번호" placeholder="02-000-0000" value={form.phone} onChangeText={(v) => set('phone', v)} maxLength={20} />
 
         <View>
-          <Label text="가게 소개" hint="고객 앱 가게 상단에 보여요. 300자까지" />
-          <Textarea value={form.intro} setValue={(v) => set('intro', v.slice(0, 300))} height={100} />
+          <Label text="가게 소개" hint="고객 앱 가게 상단에 보여요" />
+          <Textarea value={form.intro} setValue={(v) => set('intro', v)} height={100} maxLength={300} />
         </View>
 
         <View>
           <Label text="원산지 정보" hint="식품위생법에 따라 주요 재료의 원산지를 표시해요" />
-          <Textarea value={form.originInfo} setValue={(v) => set('originInfo', v.slice(0, 500))} height={80} />
+          <Textarea value={form.originInfo} setValue={(v) => set('originInfo', v)} height={80} maxLength={500} />
         </View>
 
         <View style={styles.twoCol}>
@@ -190,18 +175,6 @@ const StoreInfoEditScreen: React.FC<Props> = ({ navigation }) => {
             />
           </View>
         </View>
-
-        <View style={styles.switchRow}>
-          <View style={{ flex: 1 }}>
-            <Typography mode="subtitle3" color="gray900">
-              자체 배달 사용
-            </Typography>
-            <Typography mode="caption1" color="gray500">
-              배달 기사 호출 없이 가게에서 직접 배달하는 주문을 받을 때
-            </Typography>
-          </View>
-          <ToggleSwitch value={form.selfDelivery} onValueChange={toggleSelfDelivery} />
-        </View>
       </KeyboardAwareScrollView>
 
       <BottomBtnBox label="저장" onPress={save} disabled={!valid || saving || uploading} />
@@ -216,7 +189,6 @@ const styles = StyleSheet.create({
   image: { width: '100%', height: '100%' },
   imageEmpty: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 4 },
   twoCol: { flexDirection: 'row', gap: 12 },
-  switchRow: { flexDirection: 'row', alignItems: 'center', gap: 12, padding: 14, borderRadius: theme.radius.md, backgroundColor: theme.colors.gray50 },
 });
 
 export default StoreInfoEditScreen;

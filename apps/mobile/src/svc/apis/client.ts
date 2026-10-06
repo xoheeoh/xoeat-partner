@@ -52,7 +52,6 @@ const MESSAGES: Record<string, string> = {
   ORDER_NOT_FOUND: '주문을 찾을 수 없습니다.',
   INVALID_TRANSITION: '이미 처리된 주문입니다. 목록을 새로고침해 주세요.',
   COOKING_MINUTES_REQUIRED: '예상 조리시간을 선택해 주세요.',
-  SELF_DELIVERY_NOT_ENABLED: '자체 배달이 설정되지 않은 가게입니다.',
   REASON_REQUIRED: '사유를 입력해 주세요.',
   STORE_PAUSED: '영업 일시중지 상태에서는 주문이 들어오지 않습니다. 홈에서 영업을 재개해 주세요.',
   NO_MENU_ON_SALE: '판매중인 메뉴가 없어 주문을 만들 수 없습니다.',
