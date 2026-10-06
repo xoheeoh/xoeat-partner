@@ -98,7 +98,7 @@ const MainTabs = () => {
         name="Store"
         component={StoreScreen}
         options={{
-          header: () => <Header title="가게" bgColor={theme.colors.bg} />,
+          header: () => <Header title="가게" bgColor="white" />,
           tabBarIcon: ({ focused }) => <TabIcon name="Store" focused={focused} />,
         }}
       />
