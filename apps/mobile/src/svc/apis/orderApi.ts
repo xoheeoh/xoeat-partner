@@ -28,7 +28,6 @@ export type OrderRow = {
   total_amount: number;
   payment_method: string;
   cooking_minutes: number | null;
-  self_delivery: boolean;
   reject_reason: string | null;
   accepted_at: string | null;
   ready_at: string | null;
@@ -56,7 +55,6 @@ export const toOrder = (r: OrderRow): Order => ({
   totalAmount: r.total_amount,
   paymentMethod: r.payment_method,
   cookingMinutes: r.cooking_minutes,
-  selfDelivery: r.self_delivery,
   rejectReason: r.reject_reason,
   acceptedAt: r.accepted_at,
   readyAt: r.ready_at,
@@ -137,12 +135,11 @@ const rpcOrder = (fn: string, args: Record<string, unknown>) =>
     return { order: toOrder(full) };
   });
 
-/** 수락. 배달이면 cookingMinutes 또는 selfDelivery 중 하나는 있어야 한다 */
-export const acceptOrder = (orderId: string, opts: { cookingMinutes?: number; selfDelivery?: boolean } = {}) =>
+/** 수락. 배달 주문이면 cookingMinutes 가 있어야 한다 */
+export const acceptOrder = (orderId: string, opts: { cookingMinutes?: number } = {}) =>
   rpcOrder('accept_order', {
     p_order_id: orderId,
     p_cooking_minutes: opts.cookingMinutes ?? null,
-    p_self_delivery: opts.selfDelivery ?? false,
   });
 
 export const rejectOrder = (orderId: string, reason: string) => rpcOrder('reject_order', { p_order_id: orderId, p_reason: reason });

@@ -31,7 +31,6 @@ type ApiResult<T> = { resultCd: string; resultMsg: string } & Partial<T>;
 | `ORDER_NOT_FOUND` | 내 가게 주문이 아니거나 없음 | 주문 상태 변경 |
 | `INVALID_TRANSITION` | 현재 상태에서 허용되지 않는 전이 | 수락·거절·취소·진행 |
 | `COOKING_MINUTES_REQUIRED` | 배달 주문을 조리시간 없이 수락 | 수락 |
-| `SELF_DELIVERY_NOT_ENABLED` | 자체 배달이 꺼진 가게에서 자체 배달 수락 | 수락 |
 | `REASON_REQUIRED` | 거절·취소 사유 없음 | 거절·취소 |
 | `STORE_PAUSED` | 영업 일시중지 중 주문 생성 | 데모 주문 |
 | `NO_MENU_ON_SALE` | 판매중 메뉴가 없어 주문 생성 불가 | 데모 주문 |
@@ -55,7 +54,7 @@ interface Store {
   intro: string; originInfo: string; phone: string; address: string;
   bizNo: string; repName: string; imageUrl: string | null;
   minOrderAmount: number; deliveryFee: number;
-  deliveryEnabled: boolean; pickupEnabled: boolean; selfDelivery: boolean;
+  deliveryEnabled: boolean; pickupEnabled: boolean;
   status: 'OPEN' | 'PAUSED';
   bankName: string; accountNo: string; accountHolder: string; feeRate: number; // %
 }
@@ -64,7 +63,7 @@ interface Store {
 ### `updateStore(patch)` → `{ store }`
 
 수정 가능한 컬럼만 (name, categoryCd, intro, originInfo, phone, imageUrl, minOrderAmount, deliveryFee,
-deliveryEnabled, pickupEnabled, selfDelivery). 사업자·정산 정보와 `status` 는 직접 수정할 수 없다.
+deliveryEnabled, pickupEnabled). 사업자·정산 정보와 `status` 는 직접 수정할 수 없다.
 
 ### `setStoreStatus('OPEN' | 'PAUSED')` → `{ store }`
 
@@ -146,7 +145,7 @@ interface Order {
   status: 'PENDING' | 'ACCEPTED' | 'READY' | 'DELIVERING' | 'COMPLETED' | 'REJECTED' | 'CANCELED';
   customerName; customerPhone; address: string | null; addressDetail: string | null; requestMemo;
   itemsAmount; deliveryFee; totalAmount; paymentMethod: 'CARD';
-  cookingMinutes: number | null; selfDelivery: boolean; rejectReason: string | null;
+  cookingMinutes: number | null; rejectReason: string | null;
   acceptedAt; readyAt; deliveringAt; completedAt; canceledAt; createdAt;
   items: { id; menuName; quantity; unitPrice; options: { groupName; name; price }[]; lineAmount }[];
 }
@@ -164,7 +163,7 @@ PENDING ──accept──▶ ACCEPTED ──(포장) advance──▶ READY ─
 
 | 어댑터 | RPC | 규칙 |
 |---|---|---|
-| `acceptOrder(id, { cookingMinutes?, selfDelivery? })` | `accept_order` | PENDING 만. 배달 주문은 `cookingMinutes` 또는 `selfDelivery=true` 필요. 자체 배달은 가게 `selfDelivery` 가 켜져 있어야 함 |
+| `acceptOrder(id, { cookingMinutes? })` | `accept_order` | PENDING 만. 배달 주문은 `cookingMinutes` 필요 |
 | `rejectOrder(id, reason)` | `reject_order` | PENDING 만. 사유 필수 |
 | `cancelOrder(id, reason)` | `cancel_order` | ACCEPTED·READY 만. 사유 필수 |
 | `advanceOrder(id)` | `advance_order` | 위 그림의 다음 단계로. 그 외는 `INVALID_TRANSITION` |

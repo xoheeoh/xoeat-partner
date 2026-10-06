@@ -33,7 +33,6 @@ const OrderCard: React.FC<OrderCardProps> = ({ order, onPress, onChanged, readon
           <View style={styles.badges}>
             <Badge label={ty.label} tone={ty.tone} size="medium" />
             <Badge label={st.label} tone={st.tone} size="medium" />
-            {order.selfDelivery && <Badge label="자체배달" tone="purple" size="medium" />}
           </View>
           <Typography mode="caption1" color={isPending ? 'orange700' : 'gray500'}>
             {isPending ? `${ago(order.createdAt)} 접수` : timeOnly(order.createdAt)}

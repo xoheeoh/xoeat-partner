@@ -182,7 +182,7 @@ const StoreScreen = () => {
             가게 운영
           </Typography>
           <View style={styles.menuCard}>
-            <MenuRow icon="store-edit-outline" label="가게 정보 관리" desc="소개, 원산지, 최소주문금액, 배달비, 자체 배달" onPress={() => navigation.navigate('StoreInfoEdit')} />
+            <MenuRow icon="store-edit-outline" label="가게 정보 관리" desc="소개, 원산지, 최소주문금액, 배달비" onPress={() => navigation.navigate('StoreInfoEdit')} />
             <View style={styles.sep} />
             <MenuRow icon="clock-outline" label="영업시간 설정" desc="요일별 영업·휴게 시간" onPress={() => navigation.navigate('StoreHours')} />
             <View style={styles.sep} />

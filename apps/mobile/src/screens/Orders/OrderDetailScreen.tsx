@@ -86,7 +86,6 @@ const OrderDetailScreen: React.FC<Props> = ({ route }) => {
           <View style={styles.badges}>
             <Badge label={ty.label} tone={ty.tone} size="medium" />
             <Badge label={st.label} tone={st.tone} size="medium" />
-            {order.selfDelivery && <Badge label="자체배달" tone="purple" size="medium" />}
             {!!order.cookingMinutes && <Badge label={`조리 ${order.cookingMinutes}분`} tone="blue" size="medium" />}
           </View>
           <Typography mode="heading3" color="gray900" style={{ marginTop: 12 }}>

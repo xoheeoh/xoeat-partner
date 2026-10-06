@@ -24,7 +24,6 @@ export interface Store {
   deliveryFee: number;
   deliveryEnabled: boolean;
   pickupEnabled: boolean;
-  selfDelivery: boolean;
   status: StoreStatus;
   bankName: string;
   accountNo: string;
@@ -45,7 +44,6 @@ export type StoreEditable = Pick<
   | 'deliveryFee'
   | 'deliveryEnabled'
   | 'pickupEnabled'
-  | 'selfDelivery'
 >;
 
 export interface StoreHour {
@@ -140,7 +138,6 @@ export interface Order {
   totalAmount: number;
   paymentMethod: string;
   cookingMinutes: number | null;
-  selfDelivery: boolean;
   rejectReason: string | null;
   acceptedAt: string | null;
   readyAt: string | null;

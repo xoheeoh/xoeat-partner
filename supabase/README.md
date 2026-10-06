@@ -54,7 +54,7 @@ notifications (가게별 알림함. orders/notices 트리거가 만들고 앱은
 | 계약 | 앱에서 의존하는 곳 |
 | --- | --- |
 | 주문 상태 전이는 RPC 만 가능하고, 허용되지 않는 전이는 `INVALID_TRANSITION` | `OrderActions` 가 실패 시 토스트 후 목록 새로고침 |
-| 배달 주문 수락에는 조리시간 또는 자체 배달 중 하나가 필요 | 수락 바텀시트 |
+| 배달 주문 수락에는 조리시간이 필요 | 수락 바텀시트 |
 | 모든 테이블은 RLS 로 내 가게 행만 보인다 | 쿼리에 `store_id` 필터를 넣지 않음, Realtime 도 필터 없이 구독 |
 | `settlements` 뷰는 `security_invoker` 라 RLS 가 그대로 적용 | 정산 화면 |
 | `demo_create_order` 는 영업 일시중지 중 `STORE_PAUSED`, 1분 10건 초과 `TOO_MANY_REQUESTS` | 홈 데모 버튼 |

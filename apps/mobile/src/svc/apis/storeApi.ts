@@ -21,7 +21,6 @@ type StoreRow = {
   delivery_fee: number;
   delivery_enabled: boolean;
   pickup_enabled: boolean;
-  self_delivery: boolean;
   status: StoreStatus;
   bank_name: string;
   account_no: string;
@@ -45,7 +44,6 @@ const toStore = (r: StoreRow): Store => ({
   deliveryFee: r.delivery_fee,
   deliveryEnabled: r.delivery_enabled,
   pickupEnabled: r.pickup_enabled,
-  selfDelivery: r.self_delivery,
   status: r.status,
   bankName: r.bank_name,
   accountNo: r.account_no,
@@ -100,7 +98,6 @@ export const updateStore = (patch: Partial<StoreEditable>) =>
           ...(patch.deliveryFee !== undefined && { delivery_fee: patch.deliveryFee }),
           ...(patch.deliveryEnabled !== undefined && { delivery_enabled: patch.deliveryEnabled }),
           ...(patch.pickupEnabled !== undefined && { pickup_enabled: patch.pickupEnabled }),
-          ...(patch.selfDelivery !== undefined && { self_delivery: patch.selfDelivery }),
         })
         .eq('owner_id', ownerId)
         .select('*')

@@ -84,7 +84,7 @@ const OperationSettingScreen: React.FC<Props> = ({ navigation }) => {
         <Typography mode="subtitle3" color="gray500">
           주문 방식
         </Typography>
-        <SwitchCard icon="moped-outline" title="배달 주문" desc="배달 기사 호출 또는 자체 배달" value={delivery} onChange={setDelivery} />
+        <SwitchCard icon="moped-outline" title="배달 주문" desc="배달 기사가 음식을 가져가요" value={delivery} onChange={setDelivery} />
         <SwitchCard icon="shopping-outline" title="포장 주문" desc="고객이 가게에 방문해 픽업" value={pickup} onChange={setPickup} />
         <InfoBox>재료가 떨어졌거나 배달 기사 배차가 어려울 때 한 가지만 끌 수 있어요. 바꾼 설정은 바로 고객 앱에 반영돼요.</InfoBox>
 
