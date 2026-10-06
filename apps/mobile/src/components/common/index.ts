@@ -17,6 +17,7 @@ export * from './SearchBox';
 export * from './Textarea';
 export * from './Radio';
 export * from './Badge';
+export * from './AdultBadge';
 export * from './Skeleton';
 export * from './ToggleSwitch';
 export * from './InfoBox';

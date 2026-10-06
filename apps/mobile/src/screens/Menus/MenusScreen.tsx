@@ -12,7 +12,7 @@ import { isOk } from '@apis/client';
 import { useDialog } from '@contexts/DialogContext';
 import { SALE_STATUS } from '@dt/constants';
 import { won } from '@utils/formatter';
-import { Badge, BottomSheet, PrimaryButton, ScreenWrapper, SkeletonList, TabBar, Typography } from '@components/common';
+import { AdultBadge, Badge, BottomSheet, PrimaryButton, ScreenWrapper, SkeletonList, TabBar, Typography } from '@components/common';
 import { theme } from '@styles';
 
 type Nav = NativeStackNavigationProp<RootStackParamList>;
@@ -115,7 +115,8 @@ const MenuList: React.FC<{ nav: Nav }> = ({ nav }) => {
                   <Typography mode="subtitle2" color={item.saleStatus === 'HIDDEN' ? 'gray400' : 'gray900'} numberOfLines={1} style={{ flexShrink: 1 }}>
                     {item.name}
                   </Typography>
-                  {item.adultOnly && <Badge label="19" tone="red" />}
+                  {/* 글자는 줄 상자 안에서 살짝 위로 보이므로 마크를 1px 올려 눈으로 보기에 가운데가 되게 한다 */}
+                  {item.adultOnly && <AdultBadge style={{ transform: [{ translateY: -1 }] }} />}
                 </View>
                 <Typography mode="caption1" color="gray500" numberOfLines={1}>
                   {[item.categoryName ?? '미분류', item.standard].filter(Boolean).join(' · ')}
