@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { Animated, Dimensions, Easing, Keyboard, LayoutAnimation, ViewStyle } from 'react-native';
-import PrimaryButton from '../PrimaryButton';
+import { PrimaryButton } from '../PrimaryButton';
 
 export interface BottomBtnBoxProps {
   buttonKey?: string;

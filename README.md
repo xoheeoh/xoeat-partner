@@ -42,7 +42,7 @@
 4. **진행** — 진행중 탭에서 포장 주문은 `포장 준비 완료 → 고객 픽업 완료`, 배달 주문은 `배달 기사에게 전달 → 배달 완료` 로 넘깁니다.
    수락 후 취소도 사유와 함께 가능합니다. 카드를 누르면 영수증·고객 정보·처리 이력이 있는 상세로 갑니다.
 5. **메뉴 관리** — 메뉴 탭에서 상태 배지를 눌러 품절·숨김 처리, `+ 메뉴 등록` 으로 사진·카테고리·가격·옵션 그룹 연결까지.
-   옵션 그룹 탭에서는 "맵기 선택(필수 1개)" 같은 그룹과 옵션별 추가금·품절을 관리합니다. 칩 옆 아이콘으로 카테고리 순서를 바꿉니다.
+   옵션 그룹 탭에서는 "맵기 선택(필수 1개)" 같은 그룹과 옵션별 추가금·품절을 관리합니다. 카테고리 관리에서는 손잡이를 끌어 순서를 바꿉니다.
 6. **가게** — 영업 일시중지/재개, 배달·포장 운영 여부, 요일별 영업시간·휴게시간, 가게 소개·원산지·최소주문금액·배달비 설정,
    월별 정산(매출 − 수수료 − VAT = 입금액, D+2 입금) 조회.
 
@@ -54,8 +54,8 @@
 xoeat-partner/
   apps/mobile/                  앱 (Expo SDK 57 · React Native 0.86 · TypeScript)
     App.tsx                     네비게이션(native-stack + bottom-tabs) · 전역 프로바이더 · 폰트 로딩
-    src/screens/                Login · MainTabs(Home · Orders · Menus · Store) · 각 상세/편집 화면 15개
-    src/components/common/      디자인 시스템 — Typography · Button 3종 · TextField · Dropdown · BottomSheet · Badge · ToggleSwitch 등
+    src/screens/                Login · MainTabs(Home · Orders · Menus · Store) · 각 상세/편집 화면 11개 (알림함 포함)
+    src/components/common/      디자인 시스템 — Typography · Button 3종 · TextField · Dropdown · BottomSheet · Badge · ToggleSwitch · SortableList 등
     src/components/order/       주문 카드 · 영수증 · 상태별 액션(수락 시트 · 거절 시트)
     src/components/home/        이번 달 매출 주 단위 막대
     src/svc/apis/               API 어댑터 — 화면이 기대하는 { resultCd, resultMsg, ... } 응답을 만든다
@@ -65,7 +65,7 @@ xoeat-partner/
   docs/api-spec.md              앱이 연동 기준으로 삼은 API 명세 (상태 전이 규칙 포함)
   docs/screenshots/             README 용 화면
   supabase/                     데모용 API 서버 — 사장님·구매자 앱 공용 (아래 "범위" 참고)
-  scripts/                      데모 계정 시드(사장님 6 · 회원 2) · 서버 시나리오 테스트 64건
+  scripts/                      데모 계정 시드(사장님 6 · 회원 2) · 서버 시나리오 테스트 73건
 ```
 
 ### 기술 선택
@@ -76,6 +76,7 @@ xoeat-partner/
 | 네비게이션 | native-stack + bottom-tabs | 사장님 앱은 "지금 들어온 주문"이 중심이라 탭 1개를 주문 현황에 주고 배지로 접수대기 건수를 띄운다 |
 | 실시간 | Supabase Realtime | 폴링 대신 `orders` 변경 구독. 구독은 화면이 아니라 프로바이더가 하나만 가져 어느 탭에서도 새 주문을 놓치지 않는다 |
 | 알림음 | expo-audio | 새 주문 INSERT 에만 울린다. 가게 탭에서 끌 수 있다 |
+| 알림함 | DB 테이블 + 트리거 + Realtime | 새 주문·고객 취소·새 공지를 서버 트리거가 알림 행으로 남기고, 앱은 읽기와 읽음 처리만 한다 |
 | API 연동 | 어댑터 계층 (`svc/apis`) | 화면은 응답 계약만 보고, Supabase 호출은 어댑터에 격리 |
 | 이미지 | expo-image-picker + Supabase Storage | 정사각 크롭 후 업로드, DB 에는 URL 만 |
 | 스타일 | `StyleSheet` + 디자인 토큰 | 색은 `theme.colors.<key>` 로만. 화면 코드에 hex 없음 |
@@ -116,7 +117,7 @@ xoeat-partner/
 - 푸시 알림 — 앱이 켜져 있을 때의 Realtime 알림만 있습니다. 백그라운드 푸시(FCM/APNs)는 서버 트리거와 Expo Push 로 붙일 수 있는 자리만 두었습니다.
 - 결제 취소·환불 처리 — 거절·취소 시 "환불됩니다" 안내만 하고, 실제 PG 연동은 없습니다.
 - 세금계산서, 결제 내역(PG 승인 단위), 리뷰 답글, 1:1 문의 — 도메인 난이도보다 화면 수만 늘리는 항목이라 제외했습니다.
-- 메뉴 순서 드래그 — 카테고리는 화살표로 순서를 바꾸고, 메뉴는 등록 순서를 따릅니다.
+- 메뉴 순서 변경 — 카테고리는 드래그로 순서를 바꾸지만, 메뉴는 등록 순서를 따릅니다.
 
 ---
 
@@ -145,7 +146,7 @@ npm run web                     # 또는 npm run ios / npm run android
 
 ```bash
 npm run db:start                # Docker Desktop 필요
-npm run db:test                 # 마이그레이션 + 시드 + 서버 시나리오 테스트 64건
+npm run db:test                 # 마이그레이션 + 시드 + 서버 시나리오 테스트 73건
 SUPABASE_URL=http://127.0.0.1:54321 SUPABASE_SERVICE_ROLE_KEY=<db:status 의 service_role key> npm run seed:demo
 ```
 

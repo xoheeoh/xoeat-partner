@@ -6,7 +6,7 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import Toast from 'react-native-toast-message';
 
 import type { RootStackParamList } from '@typ/navigation';
-import type { DailySales, DashboardSummary } from '@typ/domain';
+import type { DashboardSummary } from '@typ/domain';
 import { getDashboard } from '@apis/storeApi';
 import { createDemoOrder } from '@apis/orderApi';
 import { isOk } from '@apis/client';
@@ -27,13 +27,6 @@ const QUICK_MENUS: { label: string; icon: IconName; route: keyof RootStackParamL
   { label: '영업시간', icon: 'clock-outline', route: 'StoreHours' },
   { label: '운영 설정', icon: 'tune-variant', route: 'OperationSetting' },
 ];
-
-/** 서버 마이그레이션(monthDays) 반영 전의 옛 응답(week: 최근 7일)도 이번 달 날짜만 골라 쓴다. 반영 후 제거 */
-const monthDaysOf = (summary: DashboardSummary): DailySales[] => {
-  if (summary.monthDays) return summary.monthDays;
-  const month = new Date().getMonth();
-  return (summary.week ?? []).filter((d) => new Date(`${d.date}T00:00:00`).getMonth() === month);
-};
 
 /** 홈 상단 "지금 할 일" 카드. hot 이면 브랜드색으로 채워 눈에 띄게 한다 */
 const TodoCard: React.FC<{
@@ -190,7 +183,6 @@ const HomeScreen = () => {
           </View>
         )}
 
-        {/* 오늘 주문 현황 */}
         {/* 지금 할 일: 접수대기(수락 필요) · 진행중(조리·배달). 완료 건수는 행동이 필요 없어 홈에서는 매출 옆에만 작게 둔다 */}
         <View style={styles.statsRow}>
           <TodoCard
@@ -256,7 +248,7 @@ const HomeScreen = () => {
                   </Typography>
                 </View>
               </View>
-              <MonthSalesChart days={monthDaysOf(summary)} />
+              <MonthSalesChart days={summary.monthDays} />
             </>
           ) : (
             <View style={{ gap: 10 }}>

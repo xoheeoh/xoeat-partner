@@ -80,7 +80,13 @@ const NoticeScreen = () => {
           keyExtractor={(n) => String(n.id)}
           contentContainerStyle={{ flexGrow: 1 }}
           ItemSeparatorComponent={() => <View style={styles.sep} />}
-          renderItem={({ item }) => <NoticeItem notice={item} open={openId === item.id} onToggle={() => setOpenId(openId === item.id ? null : item.id)} />}
+          renderItem={({ item }) => (
+            <NoticeItem
+              notice={item}
+              open={openId === item.id}
+              onToggle={() => setOpenId(openId === item.id ? null : item.id)}
+            />
+          )}
           ListEmptyComponent={
             <View style={styles.empty}>
               <Typography mode="body1" color="gray500">

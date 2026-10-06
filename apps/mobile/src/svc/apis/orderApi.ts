@@ -113,14 +113,20 @@ export const getTodayCounts = () =>
 
 export const getOrder = (orderId: string) =>
   run(async () => {
-    const row = unwrap(await supabase.from('orders').select(ORDER_SELECT).eq('id', orderId).single()) as unknown as OrderRow;
+    const row = unwrap(
+      await supabase.from('orders').select(ORDER_SELECT).eq('id', orderId).single(),
+    ) as unknown as OrderRow;
     return { order: toOrder(row) };
   });
 
 /** 기간·상태로 지난 주문 조회 (최신순, 최대 200건) */
 export const getOrderHistory = (fromYmd: string, toYmdStr: string, statuses?: OrderStatus[]) =>
   run(async () => {
-    let q = supabase.from('orders').select(ORDER_SELECT).gte('created_at', dayStartIso(fromYmd)).lte('created_at', dayEndIso(toYmdStr));
+    let q = supabase
+      .from('orders')
+      .select(ORDER_SELECT)
+      .gte('created_at', dayStartIso(fromYmd))
+      .lte('created_at', dayEndIso(toYmdStr));
     if (statuses?.length) q = q.in('status', statuses);
     const rows = unwrap(await q.order('created_at', { ascending: false }).limit(200)) as unknown as OrderRow[];
     return { orders: rows.map(toOrder) };
@@ -131,7 +137,9 @@ const rpcOrder = (fn: string, args: Record<string, unknown>) =>
   run(async () => {
     const row = unwrap(await supabase.rpc(fn, args).single()) as unknown as OrderRow;
     // RPC 는 항목을 돌려주지 않으므로 다시 읽는다
-    const full = unwrap(await supabase.from('orders').select(ORDER_SELECT).eq('id', row.id).single()) as unknown as OrderRow;
+    const full = unwrap(
+      await supabase.from('orders').select(ORDER_SELECT).eq('id', row.id).single(),
+    ) as unknown as OrderRow;
     return { order: toOrder(full) };
   });
 
@@ -142,8 +150,10 @@ export const acceptOrder = (orderId: string, opts: { cookingMinutes?: number } =
     p_cooking_minutes: opts.cookingMinutes ?? null,
   });
 
-export const rejectOrder = (orderId: string, reason: string) => rpcOrder('reject_order', { p_order_id: orderId, p_reason: reason });
-export const cancelOrder = (orderId: string, reason: string) => rpcOrder('cancel_order', { p_order_id: orderId, p_reason: reason });
+export const rejectOrder = (orderId: string, reason: string) =>
+  rpcOrder('reject_order', { p_order_id: orderId, p_reason: reason });
+export const cancelOrder = (orderId: string, reason: string) =>
+  rpcOrder('cancel_order', { p_order_id: orderId, p_reason: reason });
 /** 다음 단계로 (포장: 준비완료→픽업완료 / 배달: 배달시작→배달완료) */
 export const advanceOrder = (orderId: string) => rpcOrder('advance_order', { p_order_id: orderId });
 

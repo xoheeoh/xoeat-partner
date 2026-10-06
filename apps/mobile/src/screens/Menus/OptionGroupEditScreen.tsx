@@ -117,7 +117,8 @@ const OptionGroupEditScreen: React.FC<Props> = ({ navigation, route }) => {
   const commitOption = () => {
     if (!optSheet || !optSheet.name.trim()) return;
     const price = digitsToNumber(optSheet.priceText);
-    if (optSheet.key === null) setOptions([...options, { key: `new-${Date.now()}`, name: optSheet.name.trim(), price, soldOut: false }]);
+    if (optSheet.key === null)
+      setOptions([...options, { key: `new-${Date.now()}`, name: optSheet.name.trim(), price, soldOut: false }]);
     else setOptions(options.map((o) => (o.key === optSheet.key ? { ...o, name: optSheet.name.trim(), price } : o)));
     setOptSheet(null);
   };
@@ -126,7 +127,14 @@ const OptionGroupEditScreen: React.FC<Props> = ({ navigation, route }) => {
 
   const save = async () => {
     if (!store || !valid || saving) return;
-    const input: OptionGroupInput = { name, required, minSelect, maxSelect, options: options.map(({ key: _k, ...o }) => o), menuIds };
+    const input: OptionGroupInput = {
+      name,
+      required,
+      minSelect,
+      maxSelect,
+      options: options.map(({ key: _k, ...o }) => o),
+      menuIds,
+    };
     setSaving(true);
     loadingController.start();
     const res = groupId ? await updateOptionGroup(groupId, input) : await createOptionGroup(store.id, input);
@@ -140,14 +148,27 @@ const OptionGroupEditScreen: React.FC<Props> = ({ navigation, route }) => {
     navigation.goBack();
   };
 
-  if (!loaded) return <ScreenWrapper backgroundColor="white"><View /></ScreenWrapper>;
+  if (!loaded)
+    return (
+      <ScreenWrapper backgroundColor="white">
+        <View />
+      </ScreenWrapper>
+    );
 
   const linkedMenus = menus.filter((m) => menuIds.includes(m.id));
 
   return (
     <ScreenWrapper backgroundColor="white" keyboardBottomInset={BOTTOM_BTN_BOX_HEIGHT}>
       <KeyboardAwareScrollView contentContainerStyle={styles.container} keyboardAccessoryHeight={BOTTOM_BTN_BOX_HEIGHT}>
-        <TextField id="groupName" inputMode="text" label="옵션 그룹명 *" placeholder="예) 맵기 선택" value={name} onChangeText={setName} maxLength={40} />
+        <TextField
+          id="groupName"
+          inputMode="text"
+          label="옵션 그룹명 *"
+          placeholder="예) 맵기 선택"
+          value={name}
+          onChangeText={setName}
+          maxLength={40}
+        />
 
         {/* 필수/선택 */}
         <View>
@@ -215,8 +236,13 @@ const OptionGroupEditScreen: React.FC<Props> = ({ navigation, route }) => {
             {options.map((o, i) => (
               // 품절이면 줄 전체를 회색으로 가라앉히고 이름에 취소선을 그어 꺼진 항목임이 바로 보이게 한다. 오른쪽 "품절" 스위치 라벨이 이미 있어 배지는 두지 않는다
               <View key={o.key} style={[styles.optRow, o.soldOut && styles.optRowOff]}>
-                <Pressable style={{ flex: 1 }} onPress={() => setOptSheet({ key: o.key, name: o.name, priceText: o.price ? comma(o.price) : '' })}>
-                  <Typography mode="subtitle3" color={o.soldOut ? 'gray400' : 'gray900'} style={o.soldOut ? styles.strike : undefined}>
+                <Pressable
+                  style={{ flex: 1 }}
+                  onPress={() => setOptSheet({ key: o.key, name: o.name, priceText: o.price ? comma(o.price) : '' })}>
+                  <Typography
+                    mode="subtitle3"
+                    color={o.soldOut ? 'gray400' : 'gray900'}
+                    style={o.soldOut ? styles.strike : undefined}>
                     {o.name}
                   </Typography>
                   <Typography mode="caption1" color={o.soldOut ? 'gray400' : 'gray500'}>
@@ -227,14 +253,22 @@ const OptionGroupEditScreen: React.FC<Props> = ({ navigation, route }) => {
                   <Typography mode="caption1" color="gray500">
                     품절
                   </Typography>
-                  <ToggleSwitch value={o.soldOut} onValueChange={(v) => setOptions(options.map((x, j) => (j === i ? { ...x, soldOut: v } : x)))} />
+                  <ToggleSwitch
+                    value={o.soldOut}
+                    onValueChange={(v) => setOptions(options.map((x, j) => (j === i ? { ...x, soldOut: v } : x)))}
+                  />
                 </View>
                 <Pressable onPress={() => setOptions(options.filter((_, j) => j !== i))} hitSlop={8}>
                   <MaterialCommunityIcons name="close" size={18} color={theme.colors.gray400} />
                 </Pressable>
               </View>
             ))}
-            <PrimaryButton label="+ 옵션 추가" size="md" buttonColor={theme.colors.white} onPress={() => setOptSheet({ key: null, name: '', priceText: '' })} />
+            <PrimaryButton
+              label="+ 옵션 추가"
+              size="md"
+              buttonColor={theme.colors.white}
+              onPress={() => setOptSheet({ key: null, name: '', priceText: '' })}
+            />
           </View>
         </View>
 
@@ -264,7 +298,11 @@ const OptionGroupEditScreen: React.FC<Props> = ({ navigation, route }) => {
 
         {/* 삭제는 내용 맨 아래에 글자 버튼으로. 등록 화면에는 지울 게 없으니 보이지 않는다 */}
         {groupId && (
-          <Pressable onPress={removeGroup} disabled={saving} style={({ pressed }) => [styles.deleteBtn, pressed && { opacity: 0.5 }]} accessibilityRole="button">
+          <Pressable
+            onPress={removeGroup}
+            disabled={saving}
+            style={({ pressed }) => [styles.deleteBtn, pressed && { opacity: 0.5 }]}
+            accessibilityRole="button">
             <MaterialCommunityIcons name="trash-can-outline" size={16} color={theme.colors.red600} />
             <Typography mode="subtitle4" color="red600">
               이 옵션 그룹 삭제
@@ -283,7 +321,15 @@ const OptionGroupEditScreen: React.FC<Props> = ({ navigation, route }) => {
         content={
           optSheet && (
             <View style={{ gap: 12 }}>
-              <TextField id="optName" inputMode="text" label="옵션명" placeholder="예) 곱빼기" value={optSheet.name} onChangeText={(v) => setOptSheet({ ...optSheet, name: v })} maxLength={40} />
+              <TextField
+                id="optName"
+                inputMode="text"
+                label="옵션명"
+                placeholder="예) 곱빼기"
+                value={optSheet.name}
+                onChangeText={(v) => setOptSheet({ ...optSheet, name: v })}
+                maxLength={40}
+              />
               <TextField
                 id="optPrice"
                 inputMode="numeric"
@@ -313,7 +359,9 @@ const OptionGroupEditScreen: React.FC<Props> = ({ navigation, route }) => {
               <CheckBox
                 key={m.id}
                 isChecked={menuDraft.includes(m.id)}
-                setIsChecked={() => setMenuDraft(menuDraft.includes(m.id) ? menuDraft.filter((id) => id !== m.id) : [...menuDraft, m.id])}
+                setIsChecked={() =>
+                  setMenuDraft(menuDraft.includes(m.id) ? menuDraft.filter((id) => id !== m.id) : [...menuDraft, m.id])
+                }
                 labelComponent={
                   <View style={styles.menuPickLabel}>
                     <Typography mode="body2" color="gray900" numberOfLines={1} style={{ flexShrink: 1 }}>
@@ -330,7 +378,12 @@ const OptionGroupEditScreen: React.FC<Props> = ({ navigation, route }) => {
               </Typography>
             )}
             {/* 이 버튼을 눌러야 임시 선택이 반영된다. X·끌어내리기로 닫으면 바뀌지 않는다 */}
-            <PrimaryButton label={menuDraft.length > 0 ? `${menuDraft.length}개 선택 완료` : '선택 완료'} size="lg" onPress={applyMenuDraft} style={{ marginTop: 6 }} />
+            <PrimaryButton
+              label={menuDraft.length > 0 ? `${menuDraft.length}개 선택 완료` : '선택 완료'}
+              size="lg"
+              onPress={applyMenuDraft}
+              style={{ marginTop: 6 }}
+            />
           </View>
         }
       />
@@ -342,7 +395,15 @@ const styles = StyleSheet.create({
   container: { padding: 20, gap: 20 },
   twoCol: { flexDirection: 'row', gap: 12 },
   rowBetween: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  optRow: { flexDirection: 'row', alignItems: 'center', gap: 12, padding: 12, borderRadius: theme.radius.md, borderWidth: 1, borderColor: theme.colors.line },
+  optRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    padding: 12,
+    borderRadius: theme.radius.md,
+    borderWidth: 1,
+    borderColor: theme.colors.line,
+  },
   optRowOff: { backgroundColor: theme.colors.gray100, borderColor: theme.colors.gray150 },
   strike: { textDecorationLine: 'line-through' },
   // "품절" 글자와 스위치를 가로로 나란히
@@ -350,7 +411,16 @@ const styles = StyleSheet.create({
   linkBtn: { flexDirection: 'row', alignItems: 'center' },
   menuChips: { flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginTop: 8 },
   menuPickLabel: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  deleteBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 4, alignSelf: 'center', paddingVertical: 10, paddingHorizontal: 16, marginTop: 8 },
+  deleteBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 4,
+    alignSelf: 'center',
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    marginTop: 8,
+  },
 });
 
 export default OptionGroupEditScreen;

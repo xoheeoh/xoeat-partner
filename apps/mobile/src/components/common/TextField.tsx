@@ -1,9 +1,9 @@
 import { InputModeOptions, StyleSheet, TextInput, View } from 'react-native';
 import { Icon } from 'react-native-paper';
 import { theme } from '@styles';
-import PrimaryButton from './PrimaryButton';
-import AnimatedTextInput from './AnimatedTextInput';
-import Typography from './Typography';
+import { PrimaryButton } from './PrimaryButton';
+import { AnimatedTextInput } from './AnimatedTextInput';
+import { Typography } from './Typography';
 
 interface TextFieldProps {
   id: string;

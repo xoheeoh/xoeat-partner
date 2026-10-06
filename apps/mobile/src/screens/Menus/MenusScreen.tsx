@@ -12,7 +12,16 @@ import { isOk } from '@apis/client';
 import { useDialog } from '@contexts/DialogContext';
 import { SALE_STATUS } from '@dt/constants';
 import { won } from '@utils/formatter';
-import { AdultBadge, Badge, BottomSheet, PrimaryButton, ScreenWrapper, SkeletonList, TabBar, Typography } from '@components/common';
+import {
+  AdultBadge,
+  Badge,
+  BottomSheet,
+  PrimaryButton,
+  ScreenWrapper,
+  SkeletonList,
+  TabBar,
+  Typography,
+} from '@components/common';
 import { theme } from '@styles';
 
 type Nav = NativeStackNavigationProp<RootStackParamList>;
@@ -64,7 +73,13 @@ const MenuList: React.FC<{ nav: Nav }> = ({ nav }) => {
 
   const remove = async (menu: Menu) => {
     setStatusSheet(null);
-    const yes = await confirm({ title: '메뉴 삭제', message1: `'${menu.name}' 메뉴를 삭제할까요?`, message2: '지난 주문 내역에는 메뉴 이름이 그대로 남습니다.', confirmText: '삭제', cancelText: '취소' });
+    const yes = await confirm({
+      title: '메뉴 삭제',
+      message1: `'${menu.name}' 메뉴를 삭제할까요?`,
+      message2: '지난 주문 내역에는 메뉴 이름이 그대로 남습니다.',
+      confirmText: '삭제',
+      cancelText: '취소',
+    });
     if (!yes) return;
     const res = await deleteMenu(menu.id);
     if (isOk(res)) {
@@ -78,8 +93,15 @@ const MenuList: React.FC<{ nav: Nav }> = ({ nav }) => {
       {/* 카테고리 칩 */}
       <View style={styles.chipBar}>
         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.chips}>
-          {[{ id: 'ALL', name: '전체' }, ...categories, ...(hasUncategorized ? [{ id: 'NONE', name: '미분류' }] : [])].map((c) => (
-            <Pressable key={c.id} onPress={() => setCategoryId(c.id)} style={[styles.chip, categoryId === c.id && styles.chipActive]}>
+          {[
+            { id: 'ALL', name: '전체' },
+            ...categories,
+            ...(hasUncategorized ? [{ id: 'NONE', name: '미분류' }] : []),
+          ].map((c) => (
+            <Pressable
+              key={c.id}
+              onPress={() => setCategoryId(c.id)}
+              style={[styles.chip, categoryId === c.id && styles.chipActive]}>
               <Typography mode="subtitle4" color={categoryId === c.id ? 'white' : 'gray700'}>
                 {c.name}
               </Typography>
@@ -130,7 +152,11 @@ const MenuList: React.FC<{ nav: Nav }> = ({ nav }) => {
                   </Typography>
                 </View>
                 <Pressable onPress={() => setStatusSheet(item)} hitSlop={8} style={styles.statusBtn}>
-                  <Badge label={SALE_STATUS[item.saleStatus].label} tone={SALE_STATUS[item.saleStatus].tone} size="medium" />
+                  <Badge
+                    label={SALE_STATUS[item.saleStatus].label}
+                    tone={SALE_STATUS[item.saleStatus].tone}
+                    size="medium"
+                  />
                   <MaterialCommunityIcons name="chevron-down" size={16} color={theme.colors.gray500} />
                 </Pressable>
               </Pressable>
@@ -160,12 +186,21 @@ const MenuList: React.FC<{ nav: Nav }> = ({ nav }) => {
           statusSheet && (
             <View style={{ gap: 8 }}>
               {(Object.keys(SALE_STATUS) as SaleStatus[]).map((s) => (
-                <Pressable key={s} onPress={() => changeStatus(statusSheet, s)} style={[styles.choice, statusSheet.saleStatus === s && styles.choiceActive]}>
+                <Pressable
+                  key={s}
+                  onPress={() => changeStatus(statusSheet, s)}
+                  style={[styles.choice, statusSheet.saleStatus === s && styles.choiceActive]}>
                   <Badge label={SALE_STATUS[s].label} tone={SALE_STATUS[s].tone} size="medium" />
                   <Typography mode="body2" color="gray600" style={{ flex: 1 }}>
-                    {s === 'ON_SALE' ? '고객 앱에 보이고 주문할 수 있어요' : s === 'SOLD_OUT' ? '보이지만 주문은 막혀요 (오늘만 품절 등)' : '고객 앱에서 아예 보이지 않아요'}
+                    {s === 'ON_SALE'
+                      ? '고객 앱에 보이고 주문할 수 있어요'
+                      : s === 'SOLD_OUT'
+                        ? '보이지만 주문은 막혀요 (오늘만 품절 등)'
+                        : '고객 앱에서 아예 보이지 않아요'}
                   </Typography>
-                  {statusSheet.saleStatus === s && <MaterialCommunityIcons name="check" size={20} color={theme.colors.primary} />}
+                  {statusSheet.saleStatus === s && (
+                    <MaterialCommunityIcons name="check" size={20} color={theme.colors.primary} />
+                  )}
                 </Pressable>
               ))}
               <Pressable onPress={() => remove(statusSheet)} style={[styles.choice, { marginTop: 8 }]}>
@@ -214,10 +249,13 @@ const OptionGroupList: React.FC<{ nav: Nav }> = ({ nav }) => {
                   <Badge label={item.required ? '필수' : '선택'} tone={item.required ? 'orange' : 'gray'} />
                 </View>
                 <Typography mode="caption1" color="gray500">
-                  {item.required ? `${item.minSelect}~${item.maxSelect}개 선택` : `최대 ${item.maxSelect}개`} · 연결 메뉴 {item.menuCount}개
+                  {item.required ? `${item.minSelect}~${item.maxSelect}개 선택` : `최대 ${item.maxSelect}개`} · 연결
+                  메뉴 {item.menuCount}개
                 </Typography>
                 <Typography mode="body2" color="gray600" numberOfLines={2}>
-                  {item.options.map((o) => `${o.name}${o.price ? ` +${won(o.price)}` : ''}${o.soldOut ? '(품절)' : ''}`).join(', ')}
+                  {item.options
+                    .map((o) => `${o.name}${o.price ? ` +${won(o.price)}` : ''}${o.soldOut ? '(품절)' : ''}`)
+                    .join(', ')}
                 </Typography>
               </View>
               <MaterialCommunityIcons name="chevron-right" size={22} color={theme.colors.gray400} />
@@ -234,7 +272,12 @@ const OptionGroupList: React.FC<{ nav: Nav }> = ({ nav }) => {
         />
       )}
       <View style={styles.fabWrap}>
-        <PrimaryButton label="+ 옵션 그룹 등록" onPress={() => nav.navigate('OptionGroupEdit')} size="md" style={styles.fab} />
+        <PrimaryButton
+          label="+ 옵션 그룹 등록"
+          onPress={() => nav.navigate('OptionGroupEdit')}
+          size="md"
+          style={styles.fab}
+        />
       </View>
     </View>
   );
@@ -258,9 +301,23 @@ const MenusScreen = () => {
 const styles = StyleSheet.create({
   chipBar: { flexDirection: 'row', alignItems: 'center', borderBottomWidth: 1, borderBottomColor: theme.colors.line },
   chips: { paddingHorizontal: 16, paddingVertical: 8, gap: 8 },
-  chip: { paddingHorizontal: 12, height: 32, borderRadius: theme.radius.pill, backgroundColor: theme.colors.gray100, alignItems: 'center', justifyContent: 'center' },
+  chip: {
+    paddingHorizontal: 12,
+    height: 32,
+    borderRadius: theme.radius.pill,
+    backgroundColor: theme.colors.gray100,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   chipActive: { backgroundColor: theme.colors.gray900 },
-  chipManage: { width: 44, height: 44, alignItems: 'center', justifyContent: 'center', borderLeftWidth: 1, borderLeftColor: theme.colors.line },
+  chipManage: {
+    width: 44,
+    height: 44,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderLeftWidth: 1,
+    borderLeftColor: theme.colors.line,
+  },
   list: { paddingBottom: 90, flexGrow: 1 },
   sep: { height: 1, backgroundColor: theme.colors.gray100, marginLeft: 16 },
   menuRow: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingHorizontal: 16, paddingVertical: 12 },
@@ -272,7 +329,15 @@ const styles = StyleSheet.create({
   empty: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 12, paddingVertical: 80 },
   fabWrap: { position: 'absolute', right: 16, bottom: 16 },
   fab: { boxShadow: theme.shadow.primary, borderRadius: theme.radius.pill },
-  choice: { flexDirection: 'row', alignItems: 'center', gap: 12, padding: 12, borderRadius: theme.radius.md, borderWidth: 1, borderColor: theme.colors.line },
+  choice: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    padding: 12,
+    borderRadius: theme.radius.md,
+    borderWidth: 1,
+    borderColor: theme.colors.line,
+  },
   choiceActive: { borderColor: theme.colors.primary, backgroundColor: theme.colors.orange50 },
 });
 

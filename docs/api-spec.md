@@ -80,9 +80,9 @@ interface StoreHour { dayOfWeek: 0..6 /* 월..일 */; enabled: boolean; openTime
 
 RPC `dashboard_summary`. 날짜는 Asia/Seoul 기준.
 ```ts
-{ today: { sales, orderCount, pending, inProgress }, month: { sales, orderCount }, week: [{ date: 'yyyy-MM-dd', sales, orderCount } × 7] }
+{ today: { sales, orderCount, pending, inProgress }, month: { sales, orderCount }, monthDays: [{ date: 'yyyy-MM-dd', sales, orderCount } × (1일~오늘)] }
 ```
-매출은 `COMPLETED` 주문의 `totalAmount` 합.
+매출은 `COMPLETED` 주문의 `totalAmount` 합. `monthDays` 는 이번 달 1일부터 오늘까지 하루 한 줄이고, 홈은 이를 주 단위(1~7 / 8~14 / 15~21 / 22~말일)로 묶어 그린다.
 
 ### `getSettlements('yyyy-MM')` → `{ settlements }`
 
@@ -93,6 +93,27 @@ RPC `dashboard_summary`. 날짜는 Asia/Seoul 기준.
 `fee = round(sales × feeRate%)`, `vat = round(fee × 10%)`, `payout = sales − fee − vat`, 입금일 = 완료일 + 2일.
 
 ### `getNotices()` → `{ notices }`
+
+플랫폼 공지. 모든 가게에 공통이며 읽기 전용.
+
+### 알림함 (`notificationApi`)
+
+"나에게 일어난 일"을 가게별로 쌓는다. 앱은 만들지 않고 서버 트리거가 만든다 — 새 주문(`orders` INSERT), 구매자 취소(`orders` UPDATE, 호출자가 구매자일 때), 새 공지(`notices` INSERT, 모든 가게에 한 건씩).
+
+```ts
+interface AppNotification {
+  id: number; kind: 'NEW_ORDER' | 'ORDER_CANCELED' | 'NOTICE';
+  title: string; body: string;
+  orderId: string | null;   // 누르면 갈 주문
+  noticeId: number | null;  // 누르면 갈 공지
+  readAt: string | null; createdAt: string;
+}
+```
+
+- `getNotifications()` → `{ notifications }` — 최신순 50건
+- `getUnreadCount()` → `{ count }` — 안 읽은 개수만 (홈 종 아이콘 뱃지)
+- `markNotificationsRead(ids?)` → `{ count }` — RPC `mark_notifications_read`. `ids` 없으면 내 가게의 안 읽은 알림 전부
+- `subscribeNotifications(cb)` — `notifications` INSERT 구독. RLS 로 내 가게 알림만 온다
 
 ---
 
@@ -130,8 +151,7 @@ interface Option { id; name; price; soldOut: boolean; sortOrder }
 ```
 - `getOptionGroups()` / `getOptionGroup(id)`
 - `createOptionGroup(storeId, input)` / `updateOptionGroup(id, input)` — `options` 는 id 있는 것은 갱신, 없는 것은 생성, 빠진 것은 삭제. `menuIds` 로 연결 메뉴를 통째로 교체.
-- `deleteOptionGroup(id)` — 연결된 메뉴에서 옵션이 사라진다.
-- `setOptionSoldOut(optionId, soldOut)`
+- `deleteOptionGroup(id)` — 연결된 메뉴에서 옵션이 사라진다. 옵션별 품절은 `updateOptionGroup` 의 `options[].soldOut` 으로 저장한다.
 
 ---
 

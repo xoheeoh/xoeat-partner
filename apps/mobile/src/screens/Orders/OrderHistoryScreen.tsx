@@ -38,13 +38,18 @@ const OrderHistoryScreen = () => {
     const from = new Date();
     from.setDate(to.getDate() - (period - 1));
     const statuses = STATUS_FILTERS.find((s) => s.key === statusKey)?.statuses;
-    getOrderHistory(toYmd(from), toYmd(to), statuses).then((res) => setOrders(isOk(res) && res.orders ? res.orders : []));
+    getOrderHistory(toYmd(from), toYmd(to), statuses).then((res) =>
+      setOrders(isOk(res) && res.orders ? res.orders : []),
+    );
   }, [period, statusKey]);
 
   // 날짜별 묶기 (FlatList 에 헤더 행을 섞어 넣는다)
   const rows = useMemo(() => {
     if (!orders) return [];
-    const out: Array<{ type: 'header'; key: string; date: string; count: number; sales: number } | { type: 'order'; key: string; order: Order }> = [];
+    const out: (
+      | { type: 'header'; key: string; date: string; count: number; sales: number }
+      | { type: 'order'; key: string; order: Order }
+    )[] = [];
     let cur = '';
     orders.forEach((o) => {
       const d = toYmd(new Date(o.createdAt));
@@ -69,7 +74,10 @@ const OrderHistoryScreen = () => {
       {/* 기간은 "설정"이라 뱃지로, 상태는 "분류"라 주문 현황 화면과 같은 밑줄 탭으로. 모양을 달리해 두 선택이 섞여 보이지 않게 한다 */}
       <View style={styles.periodRow}>
         {PERIODS.map((p) => (
-          <Pressable key={p.key} onPress={() => setPeriod(p.key)} style={[styles.chip, period === p.key && styles.chipActive]}>
+          <Pressable
+            key={p.key}
+            onPress={() => setPeriod(p.key)}
+            style={[styles.chip, period === p.key && styles.chipActive]}>
             <Typography mode="subtitle4" color={period === p.key ? 'white' : 'gray700'}>
               {p.label}
             </Typography>
@@ -109,7 +117,12 @@ const OrderHistoryScreen = () => {
                 </Typography>
               </View>
             ) : (
-              <OrderCard order={item.order} readonly onChanged={() => {}} onPress={() => navigation.navigate('OrderDetail', { orderId: item.order.id })} />
+              <OrderCard
+                order={item.order}
+                readonly
+                onChanged={() => {}}
+                onPress={() => navigation.navigate('OrderDetail', { orderId: item.order.id })}
+              />
             )
           }
           ListEmptyComponent={
@@ -134,15 +147,47 @@ const OrderHistoryScreen = () => {
 };
 
 const styles = StyleSheet.create({
-  periodRow: { flexDirection: 'row', gap: 8, backgroundColor: theme.colors.white, paddingHorizontal: 16, paddingBottom: 12 },
-  chip: { paddingHorizontal: 12, height: 32, borderRadius: theme.radius.pill, backgroundColor: theme.colors.gray100, alignItems: 'center', justifyContent: 'center' },
+  periodRow: {
+    flexDirection: 'row',
+    gap: 8,
+    backgroundColor: theme.colors.white,
+    paddingHorizontal: 16,
+    paddingBottom: 12,
+  },
+  chip: {
+    paddingHorizontal: 12,
+    height: 32,
+    borderRadius: theme.radius.pill,
+    backgroundColor: theme.colors.gray100,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   chipActive: { backgroundColor: theme.colors.gray900 },
   // 주문 현황(OrdersScreen) 탭과 같은 모양
-  tabs: { flexDirection: 'row', backgroundColor: theme.colors.white, borderBottomWidth: 1, borderBottomColor: theme.colors.line },
-  tab: { flex: 1, height: 46, alignItems: 'center', justifyContent: 'center', borderBottomWidth: 2, borderBottomColor: 'transparent' },
+  tabs: {
+    flexDirection: 'row',
+    backgroundColor: theme.colors.white,
+    borderBottomWidth: 1,
+    borderBottomColor: theme.colors.line,
+  },
+  tab: {
+    flex: 1,
+    height: 46,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderBottomWidth: 2,
+    borderBottomColor: 'transparent',
+  },
   tabActive: { borderBottomColor: theme.colors.primary },
   list: { padding: 16, gap: 10, flexGrow: 1 },
-  dayHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'baseline', paddingTop: 8, paddingBottom: 2, paddingHorizontal: 4 },
+  dayHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'baseline',
+    paddingTop: 8,
+    paddingBottom: 2,
+    paddingHorizontal: 4,
+  },
   empty: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 12, paddingVertical: 80 },
 });
 

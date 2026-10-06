@@ -5,14 +5,17 @@ import type { Order } from '@typ/domain';
 import { Typography } from '@components/common';
 import { theme } from '@styles';
 
-/** 주문 항목과 금액 합계. 상세 화면과 목록 카드 확장에서 같이 쓴다 */
+/** 주문 항목과 금액 합계. 주문 상세 화면에서 쓴다 */
 const OrderReceipt: React.FC<{ order: Order }> = ({ order }) => (
   <View style={{ gap: 12 }}>
     {order.items.map((item) => (
       <View key={item.id} style={{ gap: 4 }}>
         <View style={styles.row}>
           <Typography mode="subtitle3" color="gray900" style={{ flex: 1 }}>
-            {item.menuName} <Typography mode="body2" color="gray500">× {item.quantity}</Typography>
+            {item.menuName}{' '}
+            <Typography mode="body2" color="gray500">
+              × {item.quantity}
+            </Typography>
           </Typography>
           <Typography mode="subtitle3" color="gray900">
             {won(item.lineAmount)}

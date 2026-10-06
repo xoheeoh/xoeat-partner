@@ -3,7 +3,7 @@ import { Keyboard, FlatList, Pressable, StyleSheet, View } from 'react-native';
 import { Icon, Portal } from 'react-native-paper';
 import { useFocusEffect } from '@react-navigation/native';
 
-import Typography from './Typography';
+import { Typography } from './Typography';
 import { controlSize, theme } from '@styles';
 
 interface DropdownProps {

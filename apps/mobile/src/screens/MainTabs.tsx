@@ -8,7 +8,7 @@ import { useOrderFeed } from '@contexts/OrderFeedContext';
 import { Header, Typography } from '@components/common';
 import { theme } from '@styles';
 import HomeScreen from './Home/HomeScreen';
-import HomeHeader from './Home/HomeHeader';
+import { HomeHeader } from './Home/HomeHeader';
 import OrdersScreen from './Orders/OrdersScreen';
 import MenusScreen from './Menus/MenusScreen';
 import StoreScreen from './Store/StoreScreen';
@@ -33,7 +33,11 @@ const TabIcon = ({ name, focused, badge }: { name: keyof MainTabParamList; focus
   return (
     <View style={styles.tabItem}>
       <View>
-        <MaterialCommunityIcons name={focused ? t.iconActive : t.icon} size={24} color={focused ? theme.colors.primary : theme.colors.gray400} />
+        <MaterialCommunityIcons
+          name={focused ? t.iconActive : t.icon}
+          size={24}
+          color={focused ? theme.colors.primary : theme.colors.gray400}
+        />
         {!!badge && (
           <View style={styles.badge}>
             <Typography mode="caption2" color="white">
@@ -76,7 +80,10 @@ const MainTabs = () => {
       <Tab.Screen
         name="Home"
         component={HomeScreen}
-        options={{ header: () => <HomeHeader />, tabBarIcon: ({ focused }) => <TabIcon name="Home" focused={focused} /> }}
+        options={{
+          header: () => <HomeHeader />,
+          tabBarIcon: ({ focused }) => <TabIcon name="Home" focused={focused} />,
+        }}
       />
       <Tab.Screen
         name="Orders"

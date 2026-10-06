@@ -1,7 +1,14 @@
 import { ReactNode, useMemo } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
-import Animated, { runOnJS, useAnimatedStyle, useSharedValue, withSpring, withTiming, type SharedValue } from 'react-native-reanimated';
+import Animated, {
+  runOnJS,
+  useAnimatedStyle,
+  useSharedValue,
+  withSpring,
+  withTiming,
+  type SharedValue,
+} from 'react-native-reanimated';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 
 import { theme } from '@styles';
@@ -66,6 +73,8 @@ interface RowProps {
 }
 
 const Row = ({ index, count, rowHeight, activeIndex, dragY, onReorder, onDragChange, children }: RowProps) => {
+  // reanimated 의 shared value 는 .value 에 직접 쓰는 것이 공식 사용법이다. React Compiler 린트가 이를 "불변값 수정"으로 오해하므로 이 블록만 끈다
+  /* eslint-disable react-hooks/immutability */
   const gesture = useMemo(
     () =>
       Gesture.Pan()
@@ -97,11 +106,16 @@ const Row = ({ index, count, rowHeight, activeIndex, dragY, onReorder, onDragCha
         }),
     [index, count, rowHeight, activeIndex, dragY, onReorder, onDragChange],
   );
+  /* eslint-enable react-hooks/immutability */
 
   const style = useAnimatedStyle(() => {
     const active = activeIndex.value;
     if (active === -1) {
-      return { transform: [{ translateY: withTiming(0, { duration: 150 }) }, { scale: withTiming(1, { duration: 150 }) }], zIndex: 0, boxShadow: 'none' };
+      return {
+        transform: [{ translateY: withTiming(0, { duration: 150 }) }, { scale: withTiming(1, { duration: 150 }) }],
+        zIndex: 0,
+        boxShadow: 'none',
+      };
     }
     if (active === index) {
       // 끄는 줄: 손가락을 따라가고 살짝 떠오른다
@@ -112,7 +126,11 @@ const Row = ({ index, count, rowHeight, activeIndex, dragY, onReorder, onDragCha
     let shift = 0;
     if (active < index && index <= target) shift = -rowHeight;
     else if (target <= index && index < active) shift = rowHeight;
-    return { transform: [{ translateY: withSpring(shift, { damping: 20, stiffness: 220 }) }, { scale: 1 }], zIndex: 0, boxShadow: 'none' };
+    return {
+      transform: [{ translateY: withSpring(shift, { damping: 20, stiffness: 220 }) }, { scale: 1 }],
+      zIndex: 0,
+      boxShadow: 'none',
+    };
   });
 
   const handle = (
@@ -123,7 +141,11 @@ const Row = ({ index, count, rowHeight, activeIndex, dragY, onReorder, onDragCha
     </GestureDetector>
   );
 
-  return <Animated.View style={[{ height: rowHeight, backgroundColor: theme.colors.white }, style]}>{children(handle)}</Animated.View>;
+  return (
+    <Animated.View style={[{ height: rowHeight, backgroundColor: theme.colors.white }, style]}>
+      {children(handle)}
+    </Animated.View>
+  );
 };
 
 const styles = StyleSheet.create({

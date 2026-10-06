@@ -30,7 +30,7 @@ export interface KeyboardAwareScrollViewProps extends Omit<ScrollViewProps, 'con
   iosBaseBottomPadding?: number;
   /**
    * Android에서 기본으로 확보할 하단 여백. (기본값 48)
-   * keyboardAccessoryHeight(버튼 56)와 합쳐 하단 버튼 상자 전체 높이(84)보다 커야 마지막 내용이 상자에 가리지 않는다.
+   * keyboardAccessoryHeight(하단 버튼 상자 높이)와 합쳐 마지막 내용이 상자에 가리지 않을 만큼 커야 한다.
    */
   androidBaseBottomPadding?: number;
   /** 추가로 더할 하단 padding */
@@ -223,26 +223,22 @@ const KeyboardAwareScrollView = React.forwardRef<ScrollView, KeyboardAwareScroll
     // 입력칸이 매 렌더마다 다시 그려지지 않도록 컨텍스트 값은 한 번만 만든다
     const focusContextValue = useMemo(() => ({ onInputFocus: () => handleInputFocusRef.current() }), []);
 
-    const handleScrollBeginDrag = (e: any) => {
-      // 화면이 스크롤 시작 시 드롭다운 같은 오버레이를 닫을 수 있게 그대로 전달한다
-      onScrollBeginDrag?.(e);
-    };
-
     // 첫 포커스는 키보드 show 이벤트가, 키보드가 떠 있는 채로 옮기는 포커스는 위 컨텍스트가 스크롤을 맡는다
 
     return (
       <KeyboardAwareScrollContext.Provider value={focusContextValue}>
+        {/* rest 를 먼저 펼쳐야 호출한 쪽이 onScroll 을 넘겨도 아래의 스크롤 위치 기록이 덮이지 않는다 */}
         <ScrollView
+          {...rest}
           ref={setRefs}
           keyboardShouldPersistTaps={keyboardShouldPersistTaps}
-          onScrollBeginDrag={handleScrollBeginDrag}
+          onScrollBeginDrag={onScrollBeginDrag}
           onScroll={(e) => {
             scrollYRef.current = e.nativeEvent.contentOffset.y;
             (rest as any).onScroll?.(e);
           }}
           scrollEventThrottle={16}
           contentContainerStyle={[contentContainerStyle, { paddingBottom: computedBottomPadding }]}
-          {...rest}
         />
       </KeyboardAwareScrollContext.Provider>
     );

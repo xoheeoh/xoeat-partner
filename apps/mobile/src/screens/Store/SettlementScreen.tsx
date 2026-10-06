@@ -16,7 +16,12 @@ const monthLabel = (key: string) => {
   return `${y}년 ${Number(m)}월`;
 };
 
-const Row: React.FC<{ label: string; value: string; strong?: boolean; minus?: boolean }> = ({ label, value, strong, minus }) => (
+const Row: React.FC<{ label: string; value: string; strong?: boolean; minus?: boolean }> = ({
+  label,
+  value,
+  strong,
+  minus,
+}) => (
   <View style={styles.row}>
     <Typography mode={strong ? 'subtitle2' : 'body2'} color={strong ? 'gray900' : 'gray600'}>
       {label}
@@ -71,7 +76,11 @@ const SettlementScreen = () => {
             {monthLabel(month)}
           </Typography>
           <Pressable onPress={() => shiftMonth(1)} hitSlop={8} style={styles.monthBtn} disabled={isCurrent}>
-            <MaterialCommunityIcons name="chevron-right" size={24} color={isCurrent ? theme.colors.gray200 : theme.colors.gray700} />
+            <MaterialCommunityIcons
+              name="chevron-right"
+              size={24}
+              color={isCurrent ? theme.colors.gray200 : theme.colors.gray700}
+            />
           </Pressable>
         </View>
         <View style={styles.totalBox}>
@@ -116,7 +125,10 @@ const SettlementScreen = () => {
                   <Typography mode="subtitle3" color="gray900">
                     {dateKo(item.settleDate)}
                   </Typography>
-                  <Badge label={item.status === 'PAID' ? '입금완료' : '입금예정'} tone={item.status === 'PAID' ? 'green' : 'orange'} />
+                  <Badge
+                    label={item.status === 'PAID' ? '입금완료' : '입금예정'}
+                    tone={item.status === 'PAID' ? 'green' : 'orange'}
+                  />
                 </View>
                 <Typography mode="caption1" color="gray500">
                   주문 {item.orderCount}건 · 매출 {won(item.salesAmount)} · {dateDot(item.payoutDate)} 입금
@@ -138,7 +150,8 @@ const SettlementScreen = () => {
           }
           ListFooterComponent={
             <Typography mode="caption1" color="gray400" style={{ textAlign: 'center', paddingVertical: 16 }}>
-              완료된 주문 금액에서 플랫폼 수수료({store?.feeRate ?? 0}%)와 수수료 VAT(10%)를 뺀 금액이 완료일 기준 2일 뒤 입금됩니다.
+              완료된 주문 금액에서 플랫폼 수수료({store?.feeRate ?? 0}%)와 수수료 VAT(10%)를 뺀 금액이 완료일 기준 2일
+              뒤 입금됩니다.
             </Typography>
           }
         />
@@ -157,9 +170,14 @@ const SettlementScreen = () => {
               <View style={styles.divider} />
               <Row label="입금액" value={won(detail.payoutAmount)} strong />
               <View style={[styles.payoutBox, detail.status === 'PAID' ? styles.payoutPaid : styles.payoutScheduled]}>
-                <MaterialCommunityIcons name={detail.status === 'PAID' ? 'check-circle-outline' : 'clock-outline'} size={18} color={detail.status === 'PAID' ? theme.colors.green700 : theme.colors.orange700} />
+                <MaterialCommunityIcons
+                  name={detail.status === 'PAID' ? 'check-circle-outline' : 'clock-outline'}
+                  size={18}
+                  color={detail.status === 'PAID' ? theme.colors.green700 : theme.colors.orange700}
+                />
                 <Typography mode="body2" color={detail.status === 'PAID' ? 'green900' : 'orange700'}>
-                  {dateDot(detail.payoutDate)} {detail.status === 'PAID' ? '입금 완료' : '입금 예정'} · {store?.bankName} {store?.accountNo}
+                  {dateDot(detail.payoutDate)} {detail.status === 'PAID' ? '입금 완료' : '입금 예정'} ·{' '}
+                  {store?.bankName} {store?.accountNo}
                 </Typography>
               </View>
             </View>
@@ -171,16 +189,44 @@ const SettlementScreen = () => {
 };
 
 const styles = StyleSheet.create({
-  summary: { backgroundColor: theme.colors.white, padding: 16, gap: 12, borderBottomWidth: 1, borderBottomColor: theme.colors.line },
+  summary: {
+    backgroundColor: theme.colors.white,
+    padding: 16,
+    gap: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: theme.colors.line,
+  },
   monthRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 16 },
   monthBtn: { width: 36, height: 36, alignItems: 'center', justifyContent: 'center' },
-  totalBox: { flexDirection: 'row', alignItems: 'flex-end', gap: 12, backgroundColor: theme.colors.gray50, borderRadius: theme.radius.md, padding: 14 },
+  totalBox: {
+    flexDirection: 'row',
+    alignItems: 'flex-end',
+    gap: 12,
+    backgroundColor: theme.colors.gray50,
+    borderRadius: theme.radius.md,
+    padding: 14,
+  },
   list: { padding: 16, gap: 8, flexGrow: 1 },
-  item: { flexDirection: 'row', alignItems: 'center', gap: 10, backgroundColor: theme.colors.white, borderRadius: theme.radius.md, padding: 14, boxShadow: theme.shadow.card },
+  item: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    backgroundColor: theme.colors.white,
+    borderRadius: theme.radius.md,
+    padding: 14,
+    boxShadow: theme.shadow.card,
+  },
   empty: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 12, paddingVertical: 80 },
   row: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'baseline' },
   divider: { height: 1, backgroundColor: theme.colors.line },
-  payoutBox: { flexDirection: 'row', alignItems: 'center', gap: 8, padding: 12, borderRadius: theme.radius.sm, marginTop: 4 },
+  payoutBox: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    padding: 12,
+    borderRadius: theme.radius.sm,
+    marginTop: 4,
+  },
   payoutPaid: { backgroundColor: theme.colors.green50 },
   payoutScheduled: { backgroundColor: theme.colors.orange50 },
 });

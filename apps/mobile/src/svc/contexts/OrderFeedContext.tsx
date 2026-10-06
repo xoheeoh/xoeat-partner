@@ -18,7 +18,7 @@ type OrderFeedContextType = {
   lastEvent: { seq: number; type: 'INSERT' | 'UPDATE'; order: Order } | null;
   /** 건수 다시 읽기 */
   refreshCounts: () => Promise<void>;
-  /** 알림음 켜짐 여부 (설정 화면에서 바꾼다) */
+  /** 알림음 켜짐 여부 (가게 탭에서 바꾼다) */
   soundOn: boolean;
   setSoundOn: (on: boolean) => void;
 };

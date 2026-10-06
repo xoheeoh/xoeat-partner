@@ -73,7 +73,9 @@ const OrderDetailScreen: React.FC<Props> = ({ route }) => {
   const timeline: { label: string; at: string | null }[] = [
     { label: '주문 접수', at: order.createdAt },
     { label: '수락', at: order.acceptedAt },
-    ...(order.orderType === 'PICKUP' ? [{ label: '포장 준비 완료', at: order.readyAt }] : [{ label: '배달 시작', at: order.deliveringAt }]),
+    ...(order.orderType === 'PICKUP'
+      ? [{ label: '포장 준비 완료', at: order.readyAt }]
+      : [{ label: '배달 시작', at: order.deliveringAt }]),
     { label: '완료', at: order.completedAt },
     { label: order.status === 'REJECTED' ? '거절' : '취소', at: order.canceledAt },
   ].filter((t) => t.at);
@@ -94,7 +96,7 @@ const OrderDetailScreen: React.FC<Props> = ({ route }) => {
           <Typography mode="body2" color="gray500">
             {dateTime(order.createdAt)} 접수
           </Typography>
-          {(order.status === 'REJECTED' || order.status === 'CANCELED') && (
+          {(order.status === 'REJECTED' || order.status === 'CANCELED') && !!order.rejectReason && (
             <View style={styles.reasonBox}>
               <Typography mode="body2" color="red600">
                 {st.label} 사유: {order.rejectReason}
@@ -110,10 +112,19 @@ const OrderDetailScreen: React.FC<Props> = ({ route }) => {
         <Section title={order.orderType === 'DELIVERY' ? '배달 정보' : '픽업 정보'}>
           <View style={{ gap: 10 }}>
             <InfoRow label="주문자" value={order.customerName} />
-            <InfoRow label="연락처" value={phone(order.customerPhone)} onPress={() => Linking.openURL(`tel:${order.customerPhone.replace(/-/g, '')}`)} />
-            {order.orderType === 'DELIVERY' && <InfoRow label="배달 주소" value={`${order.address ?? ''} ${order.addressDetail ?? ''}`.trim()} />}
+            <InfoRow
+              label="연락처"
+              value={phone(order.customerPhone)}
+              onPress={() => Linking.openURL(`tel:${order.customerPhone.replace(/-/g, '')}`)}
+            />
+            {order.orderType === 'DELIVERY' && (
+              <InfoRow label="배달 주소" value={`${order.address ?? ''} ${order.addressDetail ?? ''}`.trim()} />
+            )}
             <InfoRow label="요청사항" value={order.requestMemo || '없음'} />
-            <InfoRow label="결제" value={`${order.paymentMethod === 'CARD' ? '카드 결제' : order.paymentMethod} · ${won(order.totalAmount)}`} />
+            <InfoRow
+              label="결제"
+              value={`${order.paymentMethod === 'CARD' ? '카드 결제' : order.paymentMethod} · ${won(order.totalAmount)}`}
+            />
           </View>
         </Section>
 
@@ -134,7 +145,10 @@ const OrderDetailScreen: React.FC<Props> = ({ route }) => {
         </Section>
       </ScrollView>
 
-      {(order.status === 'PENDING' || order.status === 'ACCEPTED' || order.status === 'READY' || order.status === 'DELIVERING') && (
+      {(order.status === 'PENDING' ||
+        order.status === 'ACCEPTED' ||
+        order.status === 'READY' ||
+        order.status === 'DELIVERING') && (
         <View style={styles.bottom}>
           <OrderActions order={order} onChanged={setOrder} size="lg" />
         </View>
@@ -145,7 +159,12 @@ const OrderDetailScreen: React.FC<Props> = ({ route }) => {
 
 const styles = StyleSheet.create({
   container: { padding: 16, gap: 12, paddingBottom: 24 },
-  section: { backgroundColor: theme.colors.white, borderRadius: theme.radius.lg, padding: 16, boxShadow: theme.shadow.card },
+  section: {
+    backgroundColor: theme.colors.white,
+    borderRadius: theme.radius.lg,
+    padding: 16,
+    boxShadow: theme.shadow.card,
+  },
   badges: { flexDirection: 'row', gap: 6, flexWrap: 'wrap' },
   reasonBox: { marginTop: 12, backgroundColor: theme.colors.red50, borderRadius: theme.radius.sm, padding: 10 },
   infoRow: { flexDirection: 'row', gap: 8, alignItems: 'flex-start' },
@@ -153,7 +172,13 @@ const styles = StyleSheet.create({
   timelineRow: { flexDirection: 'row', alignItems: 'center', gap: 10 },
   dot: { width: 8, height: 8, borderRadius: 4, backgroundColor: theme.colors.gray200 },
   dotActive: { backgroundColor: theme.colors.primary },
-  bottom: { padding: 16, paddingTop: 12, backgroundColor: theme.colors.white, borderTopWidth: 1, borderTopColor: theme.colors.line },
+  bottom: {
+    padding: 16,
+    paddingTop: 12,
+    backgroundColor: theme.colors.white,
+    borderTopWidth: 1,
+    borderTopColor: theme.colors.line,
+  },
 });
 
 export default OrderDetailScreen;

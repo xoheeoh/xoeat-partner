@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { Animated, Easing, Keyboard, LayoutAnimation, ViewStyle } from 'react-native';
-import PrimaryButton from '../PrimaryButton';
+import { PrimaryButton } from '../PrimaryButton';
 import { BottomBtnBoxProps } from './BottomBtnBox.ios';
 
 const BottomBtnBox: React.FC<BottomBtnBoxProps> = ({

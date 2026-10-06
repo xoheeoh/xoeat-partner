@@ -10,7 +10,7 @@ import { theme } from '@styles';
 
 /**
  * 홈 탭 상단. 다른 탭과 같은 공통 Header 를 쓰되 제목은 가게 이름, 오른쪽은 알림 종.
- * 종은 다른 화면의 닫기 버튼과 같은 NavIconButton 이라 위치·크기가 정확히 같다.
+ * 종은 Header 의 오른쪽 자리 규격(NavIconButton)을 그대로 쓰므로 다른 화면과 위치·크기가 같다.
  */
 const HomeHeader = () => {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();

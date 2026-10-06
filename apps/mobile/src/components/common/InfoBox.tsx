@@ -59,7 +59,12 @@ const styles = StyleSheet.create({
     borderRadius: theme.radius.md,
   },
   // 아이콘 글자 상자(20)의 중심을 caption1 첫 줄(16)의 중심(8)에 맞춘다: 20 / 2 - 2 = 8
-  icon: { height: ICON_BOX_HEIGHT, marginTop: (TEXT_LINE_HEIGHT - ICON_BOX_HEIGHT) / 2, justifyContent: 'center', alignItems: 'center' },
+  icon: {
+    height: ICON_BOX_HEIGHT,
+    marginTop: (TEXT_LINE_HEIGHT - ICON_BOX_HEIGHT) / 2,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
   // 아이콘 글꼴의 글자 높이는 크기(18)와 정확히 같아 상자 끝에 닿는다. 안드로이드는 픽셀 반올림으로 아래 한 줄을 잘라내므로 줄 높이에 위아래 1px 여유를 준다
   glyph: { lineHeight: ICON_BOX_HEIGHT, includeFontPadding: false, textAlignVertical: 'center' },
   text: { flex: 1 },

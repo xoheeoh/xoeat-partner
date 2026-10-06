@@ -15,7 +15,16 @@ import { useDialog } from '@contexts/DialogContext';
 import { STORE_CATEGORIES, categoryLabel } from '@dt/constants';
 import { comma, digitsToNumber } from '@utils/formatter';
 import { loadingController } from '@utils/loadingController';
-import { BOTTOM_BTN_BOX_HEIGHT, BottomBtnBox, Dropdown, KeyboardAwareScrollView, ScreenWrapper, TextField, Textarea, Typography } from '@components/common';
+import {
+  BOTTOM_BTN_BOX_HEIGHT,
+  BottomBtnBox,
+  Dropdown,
+  KeyboardAwareScrollView,
+  ScreenWrapper,
+  TextField,
+  Textarea,
+  Typography,
+} from '@components/common';
 import { theme } from '@styles';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'StoreInfoEdit'>;
@@ -63,7 +72,12 @@ const StoreInfoEditScreen: React.FC<Props> = ({ navigation }) => {
       await alert({ title: '사진 권한', message1: '대표 사진을 고르려면 사진 보관함 접근 권한이 필요해요.' });
       return;
     }
-    const result = await ImagePicker.launchImageLibraryAsync({ mediaTypes: ['images'], allowsEditing: true, aspect: [1, 1], quality: 0.8 });
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ['images'],
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 0.8,
+    });
     if (result.canceled || !result.assets[0]) return;
     setUploading(true);
     const res = await uploadMenuImage(store.id, result.assets[0].uri, result.assets[0].mimeType ?? 'image/jpeg');
@@ -121,7 +135,15 @@ const StoreInfoEditScreen: React.FC<Props> = ({ navigation }) => {
           </View>
         </View>
 
-        <TextField id="storeName" inputMode="text" label="가게 이름 *" placeholder="가게 이름" value={form.name} onChangeText={(v) => set('name', v)} maxLength={40} />
+        <TextField
+          id="storeName"
+          inputMode="text"
+          label="가게 이름 *"
+          placeholder="가게 이름"
+          value={form.name}
+          onChangeText={(v) => set('name', v)}
+          maxLength={40}
+        />
 
         <View>
           <Label text="업종" />
@@ -129,11 +151,21 @@ const StoreInfoEditScreen: React.FC<Props> = ({ navigation }) => {
             key={form.categoryCd}
             placeholder={categoryLabel(form.categoryCd)}
             options={STORE_CATEGORIES.map((c) => c.label)}
-            onSelect={(label) => set('categoryCd', STORE_CATEGORIES.find((c) => c.label === label)?.code ?? form.categoryCd)}
+            onSelect={(label) =>
+              set('categoryCd', STORE_CATEGORIES.find((c) => c.label === label)?.code ?? form.categoryCd)
+            }
           />
         </View>
 
-        <TextField id="phone" inputMode="tel" label="가게 전화번호" placeholder="02-000-0000" value={form.phone} onChangeText={(v) => set('phone', v)} maxLength={20} />
+        <TextField
+          id="phone"
+          inputMode="tel"
+          label="가게 전화번호"
+          placeholder="02-000-0000"
+          value={form.phone}
+          onChangeText={(v) => set('phone', v)}
+          maxLength={20}
+        />
 
         <View>
           <Label text="가게 소개" hint="고객 앱 가게 상단에 보여요" />
@@ -185,7 +217,15 @@ const StoreInfoEditScreen: React.FC<Props> = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: { padding: 20, gap: 20 },
   imageRow: { flexDirection: 'row', gap: 14, alignItems: 'center' },
-  imageBox: { width: 96, height: 96, borderRadius: theme.radius.md, overflow: 'hidden', backgroundColor: theme.colors.gray50, borderWidth: 1, borderColor: theme.colors.line },
+  imageBox: {
+    width: 96,
+    height: 96,
+    borderRadius: theme.radius.md,
+    overflow: 'hidden',
+    backgroundColor: theme.colors.gray50,
+    borderWidth: 1,
+    borderColor: theme.colors.line,
+  },
   image: { width: '100%', height: '100%' },
   imageEmpty: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 4 },
   twoCol: { flexDirection: 'row', gap: 12 },

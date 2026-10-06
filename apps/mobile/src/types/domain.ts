@@ -104,7 +104,7 @@ export interface OptionGroupInput {
   required: boolean;
   minSelect: number;
   maxSelect: number;
-  options: Array<Pick<Option, 'name' | 'price' | 'soldOut'> & { id?: string }>;
+  options: (Pick<Option, 'name' | 'price' | 'soldOut'> & { id?: string })[];
   menuIds: string[];
 }
 
@@ -153,8 +153,6 @@ export interface DashboardSummary {
   month: { sales: number; orderCount: number };
   /** 이번 달 1일 ~ 오늘, 하루 한 줄 */
   monthDays: DailySales[];
-  /** @deprecated 예전 서버(최근 7일)가 내려주던 값. 서버 마이그레이션 반영 후 제거 */
-  week?: DailySales[];
 }
 
 export interface DailySales {

@@ -20,11 +20,14 @@ supabase/
     20261001000300_demo.sql     데모 주문 생성 · 데모 가게 부트스트랩
     20261002000000_customer.sql 회원 · 배송지 · 결제수단 · 찜 · place_order / cancel_my_order · 구매자 RLS
     20261002000100_customer_demo.sql  추가 가게(메뉴 JSON) · 데모 회원 부트스트랩
+    20261002000200_dashboard_month_days.sql  대시보드가 "최근 7일" 대신 "이번 달 1일~오늘" 날짜별 매출을 내려준다
+    20261002000300_notice_body_newline.sql   공지 본문에 글자 그대로 들어간 \n 을 줄바꿈으로
+    20261002000400_notifications.sql         사장님 알림함 — 테이블 · RLS · 트리거(새 주문/구매자 취소/새 공지) · 읽음 처리 RPC · Realtime
   seed.sql                      공지사항
   config.toml                   로컬 스택 설정 (구매자 회원가입 허용, 이메일 확인 없음)
 scripts/
   seed-demo.mjs                 사장님 6 · 회원 2 생성 (서비스 롤)
-  test.sql · verify.sh          서버 시나리오 테스트 64건
+  test.sql · verify.sh          서버 시나리오 테스트 73건
 ```
 
 앱이 호출하는 방식은 두 가지입니다.
@@ -64,7 +67,7 @@ notifications (가게별 알림함. orders/notices 트리거가 만들고 앱은
 
 ## 검증
 
-`scripts/test.sql` 이 64개 시나리오(RLS 격리, 상태 전이 7종, 조리시간 필수, 사유 필수, 자체 배달,
+`scripts/test.sql` 이 73개 시나리오(RLS 격리, 상태 전이 7종, 조리시간 필수, 사유 필수, 자체 배달,
 영업 일시중지, 대시보드, 메뉴 CRUD, 직접 UPDATE 차단, 남의 주문 접근 차단, 회원 가입 트리거, 구매자 주문 생성의
 검증 9종과 금액 계산, 구매자 취소, 사장님이 구매자 주문을 수락)를 검사합니다.
 
@@ -79,5 +82,5 @@ PGURL=postgres://... ./scripts/verify.sh --shim   # 순정 Postgres (auth/storag
 | --- | --- | --- |
 | 주문 유입 | 구매자 앱 `place_order` / `demo_create_order` | 실제 PG 승인 후 주문 확정 (Edge Function) |
 | 고객 알림(수락·거절·픽업 안내) | 없음 | 상태 변경 트리거 → 알림톡/푸시 |
-| 사장님 백그라운드 푸시 | 없음 (Realtime 만) | `orders` INSERT 트리거 → Expo Push |
+| 사장님 백그라운드 푸시 | 없음 (Realtime + 앱 안 알림함) | `notifications` INSERT 트리거 → Expo Push |
 | 정산 | 뷰로 즉시 계산 | 일 배치로 `settlements` 테이블 적재 + 실제 이체 |

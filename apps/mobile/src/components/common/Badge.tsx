@@ -1,6 +1,6 @@
 import { StyleSheet, View, ViewStyle } from 'react-native';
 
-import Typography from './Typography';
+import { Typography } from './Typography';
 import { theme } from '@styles';
 
 export type BadgeTone = 'orange' | 'red' | 'blue' | 'purple' | 'gray' | 'green' | 'yellow';

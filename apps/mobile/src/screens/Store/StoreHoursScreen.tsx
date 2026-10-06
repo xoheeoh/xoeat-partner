@@ -11,12 +11,28 @@ import { useStore } from '@contexts/StoreContext';
 import { useDialog } from '@contexts/DialogContext';
 import { DAY_LABELS, TIME_OPTIONS } from '@dt/constants';
 import { loadingController } from '@utils/loadingController';
-import { BOTTOM_BTN_BOX_HEIGHT, BottomBtnBox, CheckBox, Dropdown, InfoBox, ScreenWrapper, ToggleSwitch, Typography } from '@components/common';
+import {
+  BOTTOM_BTN_BOX_HEIGHT,
+  BottomBtnBox,
+  CheckBox,
+  Dropdown,
+  InfoBox,
+  ScreenWrapper,
+  ToggleSwitch,
+  Typography,
+} from '@components/common';
 import { theme } from '@styles';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'StoreHours'>;
 
-const DEFAULT_HOURS: StoreHour[] = DAY_LABELS.map((_, i) => ({ dayOfWeek: i, enabled: true, openTime: '10:00', closeTime: '22:00', breakFrom: null, breakTo: null }));
+const DEFAULT_HOURS: StoreHour[] = DAY_LABELS.map((_, i) => ({
+  dayOfWeek: i,
+  enabled: true,
+  openTime: '10:00',
+  closeTime: '22:00',
+  breakFrom: null,
+  breakTo: null,
+}));
 
 const toMin = (hhmm: string) => {
   const [h, m] = hhmm.split(':').map(Number);
@@ -40,7 +56,8 @@ const StoreHoursScreen: React.FC<Props> = ({ navigation }) => {
   }, []);
 
   const dirty = JSON.stringify(hours) !== original;
-  const patch = (i: number, p: Partial<StoreHour>) => setHours((h) => h.map((d, idx) => (idx === i ? { ...d, ...p } : d)));
+  const patch = (i: number, p: Partial<StoreHour>) =>
+    setHours((h) => h.map((d, idx) => (idx === i ? { ...d, ...p } : d)));
 
   /** 월요일 설정을 다른 모든 요일에 복사 */
   const applyMondayToAll = () => {
@@ -71,7 +88,11 @@ const StoreHoursScreen: React.FC<Props> = ({ navigation }) => {
     if (!store || saving) return;
     const errors = validate();
     if (errors.length) {
-      await alert({ title: '시간 설정 확인', message1: errors[0], message2: errors.length > 1 ? `외 ${errors.length - 1}건` : undefined });
+      await alert({
+        title: '시간 설정 확인',
+        message1: errors[0],
+        message2: errors.length > 1 ? `외 ${errors.length - 1}건` : undefined,
+      });
       return;
     }
     setSaving(true);
@@ -91,7 +112,8 @@ const StoreHoursScreen: React.FC<Props> = ({ navigation }) => {
     <ScreenWrapper backgroundColor="white">
       <ScrollView contentContainerStyle={[styles.container, { paddingBottom: BOTTOM_BTN_BOX_HEIGHT + 24 }]}>
         <InfoBox>
-          영업시간 밖에는 고객 앱에 준비중으로 표시되고 주문을 받지 않아요. 자정을 넘기는 영업은 종료 시간을 새벽 시간으로 두면 돼요 (예: 17:00 ~ 02:00).
+          영업시간 밖에는 고객 앱에 준비중으로 표시되고 주문을 받지 않아요. 자정을 넘기는 영업은 종료 시간을 새벽
+          시간으로 두면 돼요 (예: 17:00 ~ 02:00).
         </InfoBox>
         <Pressable onPress={applyMondayToAll} style={styles.copyBtn}>
           <Typography mode="subtitle4" color="orange700">
@@ -117,13 +139,25 @@ const StoreHoursScreen: React.FC<Props> = ({ navigation }) => {
               <>
                 <View style={styles.timeRow}>
                   <View style={{ flex: 1 }}>
-                    <Dropdown key={`o-${i}-${d.openTime}`} size="md" placeholder={d.openTime} options={TIME_OPTIONS} onSelect={(v) => patch(i, { openTime: v })} />
+                    <Dropdown
+                      key={`o-${i}-${d.openTime}`}
+                      size="md"
+                      placeholder={d.openTime}
+                      options={TIME_OPTIONS}
+                      onSelect={(v) => patch(i, { openTime: v })}
+                    />
                   </View>
                   <Typography mode="body2" color="gray500">
                     ~
                   </Typography>
                   <View style={{ flex: 1 }}>
-                    <Dropdown key={`c-${i}-${d.closeTime}`} size="md" placeholder={d.closeTime} options={TIME_OPTIONS} onSelect={(v) => patch(i, { closeTime: v })} />
+                    <Dropdown
+                      key={`c-${i}-${d.closeTime}`}
+                      size="md"
+                      placeholder={d.closeTime}
+                      options={TIME_OPTIONS}
+                      onSelect={(v) => patch(i, { closeTime: v })}
+                    />
                   </View>
                 </View>
                 {toMin(d.closeTime) <= toMin(d.openTime) && (
@@ -134,7 +168,12 @@ const StoreHoursScreen: React.FC<Props> = ({ navigation }) => {
 
                 <CheckBox
                   isChecked={!!d.breakFrom}
-                  setIsChecked={() => patch(i, d.breakFrom ? { breakFrom: null, breakTo: null } : { breakFrom: '15:00', breakTo: '17:00' })}
+                  setIsChecked={() =>
+                    patch(
+                      i,
+                      d.breakFrom ? { breakFrom: null, breakTo: null } : { breakFrom: '15:00', breakTo: '17:00' },
+                    )
+                  }
                   labelComponent={
                     <Typography mode="body2" color="gray700">
                       휴게시간 (브레이크 타임)
@@ -144,13 +183,25 @@ const StoreHoursScreen: React.FC<Props> = ({ navigation }) => {
                 {!!d.breakFrom && (
                   <View style={styles.timeRow}>
                     <View style={{ flex: 1 }}>
-                      <Dropdown key={`bf-${i}-${d.breakFrom}`} size="md" placeholder={d.breakFrom} options={TIME_OPTIONS} onSelect={(v) => patch(i, { breakFrom: v })} />
+                      <Dropdown
+                        key={`bf-${i}-${d.breakFrom}`}
+                        size="md"
+                        placeholder={d.breakFrom}
+                        options={TIME_OPTIONS}
+                        onSelect={(v) => patch(i, { breakFrom: v })}
+                      />
                     </View>
                     <Typography mode="body2" color="gray500">
                       ~
                     </Typography>
                     <View style={{ flex: 1 }}>
-                      <Dropdown key={`bt-${i}-${d.breakTo}`} size="md" placeholder={d.breakTo ?? ''} options={TIME_OPTIONS} onSelect={(v) => patch(i, { breakTo: v })} />
+                      <Dropdown
+                        key={`bt-${i}-${d.breakTo}`}
+                        size="md"
+                        placeholder={d.breakTo ?? ''}
+                        options={TIME_OPTIONS}
+                        onSelect={(v) => patch(i, { breakTo: v })}
+                      />
                     </View>
                   </View>
                 )}

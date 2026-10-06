@@ -58,7 +58,10 @@ const OrderActions: React.FC<OrderActionsProps> = ({ order, onChanged, size = 'm
   };
 
   const acceptWith = async (cookingMinutes: number) => {
-    const ok = await call(() => acceptOrder(order.id, { cookingMinutes }), `주문을 수락했어요. 예상 조리시간 ${cookingMinutes}분`);
+    const ok = await call(
+      () => acceptOrder(order.id, { cookingMinutes }),
+      `주문을 수락했어요. 예상 조리시간 ${cookingMinutes}분`,
+    );
     if (ok) setAcceptSheet(false);
   };
 
@@ -88,28 +91,40 @@ const OrderActions: React.FC<OrderActionsProps> = ({ order, onChanged, size = 'm
     const next = nextStepOf(order);
     if (!next) return;
     if (next.confirmTitle) {
-      const yes = await confirm({ title: next.confirmTitle, message1: next.confirmMsg ?? '', confirmText: next.label, cancelText: '취소' });
+      const yes = await confirm({
+        title: next.confirmTitle,
+        message1: next.confirmMsg ?? '',
+        confirmText: next.label,
+        cancelText: '취소',
+      });
       if (!yes) return;
     }
     call(() => advanceOrder(order.id), next.doneMsg);
   };
 
   const next = nextStepOf(order);
-  const btnSize = size;
 
   return (
     <>
       <View style={styles.row}>
         {order.status === 'PENDING' && (
           <>
-            <SecondaryButton label="거절" size={btnSize} onPress={() => openReason('reject')} style={styles.flex1} />
-            <PrimaryButton label="주문 수락" size={btnSize} onPress={handleAccept} style={styles.flex2} />
+            <SecondaryButton label="거절" size={size} onPress={() => openReason('reject')} style={styles.flex1} />
+            <PrimaryButton label="주문 수락" size={size} onPress={handleAccept} style={styles.flex2} />
           </>
         )}
         {(order.status === 'ACCEPTED' || order.status === 'READY') && (
-          <SecondaryButton label="주문 취소" size={btnSize} onPress={() => openReason('cancel')} style={styles.flex1} />
+          <SecondaryButton label="주문 취소" size={size} onPress={() => openReason('cancel')} style={styles.flex1} />
         )}
-        {next && <PrimaryButton label={next.label} size={btnSize} onPress={handleAdvance} style={styles.flex2} buttonColor={next.color} />}
+        {next && (
+          <PrimaryButton
+            label={next.label}
+            size={size}
+            onPress={handleAdvance}
+            style={styles.flex2}
+            buttonColor={next.color}
+          />
+        )}
       </View>
 
       {/* 배달 주문 수락: 예상 조리시간 */}
@@ -170,20 +185,36 @@ const OrderActions: React.FC<OrderActionsProps> = ({ order, onChanged, size = 'm
 };
 
 /** 다음 단계 버튼 정의. 서버 advance_order 와 같은 규칙 */
-const nextStepOf = (o: Order): { label: string; doneMsg: string; color?: string; confirmTitle?: string; confirmMsg?: string } | null => {
+const nextStepOf = (
+  o: Order,
+): { label: string; doneMsg: string; color?: string; confirmTitle?: string; confirmMsg?: string } | null => {
   if (o.status === 'ACCEPTED' && o.orderType === 'PICKUP') {
     return {
       label: '포장 준비 완료',
       doneMsg: '고객에게 포장이 준비되었다고 알렸어요.',
       confirmTitle: '포장 준비 완료',
-      confirmMsg: '완료를 누르면 고객에게 픽업 안내가 전송됩니다.',
+      confirmMsg: '"포장 준비 완료"를 누르면 고객에게 픽업 안내가 전송됩니다.',
     };
   }
   if (o.status === 'ACCEPTED' && o.orderType === 'DELIVERY') {
-    return { label: '배달 기사에게 전달', doneMsg: '배달이 시작되었어요.', color: theme.colors.purple600, confirmTitle: '조리가 끝났나요?', confirmMsg: '배달 기사에게 음식을 전달한 뒤 눌러 주세요.' };
+    return {
+      label: '배달 기사에게 전달',
+      doneMsg: '배달이 시작되었어요.',
+      color: theme.colors.purple600,
+      confirmTitle: '조리가 끝났나요?',
+      confirmMsg: '배달 기사에게 음식을 전달한 뒤 눌러 주세요.',
+    };
   }
-  if (o.status === 'READY') return { label: '고객 픽업 완료', doneMsg: '주문이 완료되었어요.', color: theme.colors.green600 };
-  if (o.status === 'DELIVERING') return { label: '배달 완료', doneMsg: '주문이 완료되었어요.', color: theme.colors.green600, confirmTitle: '배달을 완료 처리할까요?' };
+  if (o.status === 'READY')
+    return { label: '고객 픽업 완료', doneMsg: '주문이 완료되었어요.', color: theme.colors.green600 };
+  if (o.status === 'DELIVERING')
+    return {
+      label: '배달 완료',
+      doneMsg: '주문이 완료되었어요.',
+      color: theme.colors.green600,
+      confirmTitle: '배달을 완료 처리할까요?',
+      confirmMsg: '고객에게 배달 완료가 안내되고 주문이 완료로 바뀝니다.',
+    };
   return null;
 };
 
