@@ -1,6 +1,6 @@
 import { Animated, Pressable, StyleSheet, ViewStyle } from 'react-native';
 
-import Typography from './Typography';
+import { Typography } from './Typography';
 import { usePressScale } from './usePressScale';
 import { controlSize, ControlSize, theme } from '@styles';
 

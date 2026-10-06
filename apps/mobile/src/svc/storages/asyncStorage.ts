@@ -65,20 +65,6 @@ export const storeData = async (key: string, value: any) => {
   }
 };
 
-// 객체 값 병합 저장
-export const mergeData = async <T>(key: string, newData: Partial<T>): Promise<void> => {
-  try {
-    const existingData = await AsyncStorage.getItem(key);
-    const parsedData: T = existingData ? JSON.parse(existingData) : ({} as T);
-
-    const mergedData = { ...parsedData, ...newData };
-
-    await AsyncStorage.setItem(key, JSON.stringify(mergedData));
-  } catch (error: any) {
-    console.error(`${key} 데이터 병합 오류:`, error.message);
-  }
-};
-
 // 데이터 불러오기
 export const getData = async <T>(key: string): Promise<T | null> => {
   try {
@@ -90,13 +76,4 @@ export const getData = async <T>(key: string): Promise<T | null> => {
     console.error(`${key} 데이터 불러오기 오류:`, error.message);
   }
   return null;
-};
-
-// 데이터 삭제하기
-export const removeData = async (key: string) => {
-  try {
-    await AsyncStorage.removeItem(key);
-  } catch (error: any) {
-    console.error('데이터 삭제 오류:', error.message);
-  }
 };

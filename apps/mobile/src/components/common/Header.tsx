@@ -4,7 +4,7 @@ import { NavigationProp, useNavigation } from '@react-navigation/native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import type { RootStackParamList } from '@typ/navigation';
-import Typography from './Typography';
+import { Typography } from './Typography';
 import { NAV_ICON_BUTTON_SIZE, NavIconButton } from './NavIconButton';
 import { theme } from '@styles';
 
@@ -44,7 +44,7 @@ const Header: React.FC<HeaderProps> = ({ bgColor, title, leftButton, leftEvent, 
         <Typography mode="subtitle1" color="gray900" numberOfLines={1} style={styles.title}>
           {title}
         </Typography>
-        {/* 닫기 버튼: DashboardNav 의 햄버거 버튼과 같은 컴포넌트를 써서 위치·모양을 맞춘다 */}
+        {/* 오른쪽 자리: right 요소 → 닫기 버튼(rightButton) → 빈 칸 순. 빈 칸도 같은 폭이라 제목이 항상 가운데 온다 */}
         {right ? (
           right
         ) : rightButton ? (
@@ -73,7 +73,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: 16, // DashboardNav 와 같은 좌우 여백. 닫기 버튼이 햄버거 버튼과 같은 자리에 온다
+    paddingHorizontal: 16,
   },
   title: { flex: 1, textAlign: 'center' },
   button: {

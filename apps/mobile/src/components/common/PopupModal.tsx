@@ -1,10 +1,10 @@
 import { Platform, StyleSheet, View } from 'react-native';
 import { WEB_MAX_WIDTH } from '@utils/dimensions';
 import { Modal, Portal } from 'react-native-paper';
-import Typography from './Typography';
+import { Typography } from './Typography';
 import { theme } from '@styles';
-import PrimaryButton from './PrimaryButton';
-import SecondaryButton from './SecondaryButton';
+import { PrimaryButton } from './PrimaryButton';
+import { SecondaryButton } from './SecondaryButton';
 
 interface PopupModalProps {
   visible: boolean;

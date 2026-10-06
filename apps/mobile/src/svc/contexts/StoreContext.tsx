@@ -52,7 +52,10 @@ export function StoreProvider({ children, enabled }: { children: React.ReactNode
     return false;
   }, []);
 
-  const value = useMemo<StoreContextType>(() => ({ store, loading, refresh, setStore, setStatus }), [store, loading, refresh, setStatus]);
+  const value = useMemo<StoreContextType>(
+    () => ({ store, loading, refresh, setStore, setStatus }),
+    [store, loading, refresh, setStatus],
+  );
 
   return <StoreContext.Provider value={value}>{children}</StoreContext.Provider>;
 }

@@ -41,15 +41,12 @@ const OrdersScreen = () => {
   const [refreshing, setRefreshing] = useState(false);
   const handledSeq = useRef(0);
 
-  const load = useCallback(
-    async (t: OrderTab, silent = false) => {
-      if (!silent) setOrders(null);
-      const res = await getTodayOrders(t);
-      if (isOk(res) && res.orders) setOrders(res.orders);
-      else setOrders([]);
-    },
-    [],
-  );
+  const load = useCallback(async (t: OrderTab, silent = false) => {
+    if (!silent) setOrders(null);
+    const res = await getTodayOrders(t);
+    if (isOk(res) && res.orders) setOrders(res.orders);
+    else setOrders([]);
+  }, []);
 
   // 홈에서 특정 탭을 지정해 들어온 경우
   useEffect(() => {
@@ -76,7 +73,7 @@ const OrdersScreen = () => {
     setRefreshing(false);
   };
 
-  /** 액션 후 서버가 돌려준 주문으로 목록을 갱신. 다른 탭으로 옮겨간 주문은 목록에서 뺀다 */
+  /** 액션 후 서버가 돌려준 주문으로 목록을 제자리 갱신하고, 잠시 뒤 다시 읽어 다른 탭으로 옮겨간 주문을 뺀다 */
   const handleChanged = (updated: Order) => {
     setOrders((prev) => (prev ?? []).map((o) => (o.id === updated.id ? updated : o)));
     refreshCounts();
@@ -107,8 +104,15 @@ const OrdersScreen = () => {
               <Typography mode="subtitle3" color={active ? 'orange700' : 'gray500'}>
                 {t.label}
               </Typography>
-              <View style={[styles.count, active && styles.countActive, t.key === 'PENDING' && counts.PENDING > 0 && styles.countPending]}>
-                <Typography mode="caption2" color={t.key === 'PENDING' && counts.PENDING > 0 ? 'white' : active ? 'orange700' : 'gray500'}>
+              <View
+                style={[
+                  styles.count,
+                  active && styles.countActive,
+                  t.key === 'PENDING' && counts.PENDING > 0 && styles.countPending,
+                ]}>
+                <Typography
+                  mode="caption2"
+                  color={t.key === 'PENDING' && counts.PENDING > 0 ? 'white' : active ? 'orange700' : 'gray500'}>
                   {counts[t.key]}
                 </Typography>
               </View>
@@ -126,9 +130,15 @@ const OrdersScreen = () => {
           data={orders}
           keyExtractor={(o) => o.id}
           contentContainerStyle={styles.list}
-          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={theme.colors.primary} />}
+          refreshControl={
+            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={theme.colors.primary} />
+          }
           renderItem={({ item }) => (
-            <OrderCard order={item} onChanged={handleChanged} onPress={() => navigation.navigate('OrderDetail', { orderId: item.id })} />
+            <OrderCard
+              order={item}
+              onChanged={handleChanged}
+              onPress={() => navigation.navigate('OrderDetail', { orderId: item.id })}
+            />
           )}
           ListEmptyComponent={
             <View style={styles.empty}>
@@ -173,7 +183,15 @@ const styles = StyleSheet.create({
     borderBottomColor: 'transparent',
   },
   tabActive: { borderBottomColor: theme.colors.primary },
-  count: { minWidth: 20, height: 20, paddingHorizontal: 6, borderRadius: 10, backgroundColor: theme.colors.gray100, alignItems: 'center', justifyContent: 'center' },
+  count: {
+    minWidth: 20,
+    height: 20,
+    paddingHorizontal: 6,
+    borderRadius: 10,
+    backgroundColor: theme.colors.gray100,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   countActive: { backgroundColor: theme.colors.orange50 },
   countPending: { backgroundColor: theme.colors.primary },
   list: { padding: 16, gap: 12, flexGrow: 1 },

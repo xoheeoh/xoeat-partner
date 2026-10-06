@@ -12,18 +12,24 @@ import { SUPABASE_ANON_KEY, SUPABASE_URL } from '@env';
 import { secureStorage } from '@storages/asyncStorage';
 
 if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
-  console.warn('EXPO_PUBLIC_SUPABASE_URL / EXPO_PUBLIC_SUPABASE_ANON_KEY 가 설정되지 않았습니다. apps/mobile/.env 확인');
+  console.warn(
+    'EXPO_PUBLIC_SUPABASE_URL / EXPO_PUBLIC_SUPABASE_ANON_KEY 가 설정되지 않았습니다. apps/mobile/.env 확인',
+  );
 }
 
 // 값이 비어 있어도 앱은 뜨게 두고(로그인 시 NETWORK 오류로 안내), createClient 가 throw 하지 않도록 자리표시자를 넣는다
-export const supabase = createClient(SUPABASE_URL || 'http://localhost:54321', SUPABASE_ANON_KEY || 'missing-anon-key', {
-  auth: {
-    storage: secureStorage,
-    autoRefreshToken: true,
-    persistSession: true,
-    detectSessionInUrl: false,
+export const supabase = createClient(
+  SUPABASE_URL || 'http://localhost:54321',
+  SUPABASE_ANON_KEY || 'missing-anon-key',
+  {
+    auth: {
+      storage: secureStorage,
+      autoRefreshToken: true,
+      persistSession: true,
+      detectSessionInUrl: false,
+    },
   },
-});
+);
 
 if (Platform.OS !== 'web') {
   AppState.addEventListener('change', (state) => {

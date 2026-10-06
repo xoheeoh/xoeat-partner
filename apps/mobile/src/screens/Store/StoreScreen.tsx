@@ -22,7 +22,7 @@ type IconName = React.ComponentProps<typeof MaterialCommunityIcons>['name'];
 
 const OPEN_MS = 220;
 
-/** 헤더의 작은 정보 칩. 유리판 위에 연한 주황 알약. 꺼진 항목은 회색 */
+/** 프로필 카드의 작은 정보 칩. 연한 주황 알약, 꺼진 항목은 회색 */
 const Chip: React.FC<{ icon: IconName; label: string; off?: boolean }> = ({ icon, label, off = false }) => (
   <View style={[styles.chip, off && styles.chipOff]}>
     <MaterialCommunityIcons name={icon} size={14} color={off ? theme.colors.gray400 : theme.colors.orange700} />
@@ -43,8 +43,15 @@ const Row: React.FC<{ label: string; value: string }> = ({ label, value }) => (
   </View>
 );
 
-const MenuRow: React.FC<{ icon: IconName; label: string; desc?: string; onPress: () => void }> = ({ icon, label, desc, onPress }) => (
-  <Pressable onPress={onPress} style={({ pressed }) => [styles.menuRow, pressed && { backgroundColor: theme.colors.gray50 }]}>
+const MenuRow: React.FC<{ icon: IconName; label: string; desc?: string; onPress: () => void }> = ({
+  icon,
+  label,
+  desc,
+  onPress,
+}) => (
+  <Pressable
+    onPress={onPress}
+    style={({ pressed }) => [styles.menuRow, pressed && { backgroundColor: theme.colors.gray50 }]}>
     <MaterialCommunityIcons name={icon} size={22} color={theme.colors.gray700} />
     <View style={{ flex: 1 }}>
       <Typography mode="body1" color="gray900">
@@ -64,7 +71,11 @@ const MenuRow: React.FC<{ icon: IconName; label: string; desc?: string; onPress:
  * 접어 두는 참고 정보 구역. 제목 줄은 고정하고 본문 높이만 0 ↔ 실제 높이로 움직인다 (공지 화면과 같은 방식).
  * 바꿀 수 없고 거의 안 보는 정보라 기본은 접힌 상태.
  */
-const CollapsibleSection: React.FC<{ title: string; desc: string; children: React.ReactNode }> = ({ title, desc, children }) => {
+const CollapsibleSection: React.FC<{ title: string; desc: string; children: React.ReactNode }> = ({
+  title,
+  desc,
+  children,
+}) => {
   const [open, setOpen] = useState(false);
   const [bodyHeight, setBodyHeight] = useState(0);
   const height = useSharedValue(0);
@@ -107,13 +118,24 @@ const StoreScreen = () => {
   const { confirm } = useDialog();
 
   const handleLogout = async () => {
-    const yes = await confirm({ title: '로그아웃', message1: '로그아웃 할까요?', message2: '로그아웃 중에는 새 주문 알림을 받을 수 없어요.', confirmText: '로그아웃', cancelText: '취소' });
+    const yes = await confirm({
+      title: '로그아웃',
+      message1: '로그아웃 할까요?',
+      message2: '로그아웃 중에는 새 주문 알림을 받을 수 없어요.',
+      confirmText: '로그아웃',
+      cancelText: '취소',
+    });
     if (!yes) return;
     await logout();
     goToLogin(navigation);
   };
 
-  if (!store) return <ScreenWrapper backgroundColor={theme.colors.bg} inTab><View /></ScreenWrapper>;
+  if (!store)
+    return (
+      <ScreenWrapper backgroundColor={theme.colors.bg} inTab>
+        <View />
+      </ScreenWrapper>
+    );
 
   const paused = store.status === 'PAUSED';
 
@@ -153,7 +175,12 @@ const StoreScreen = () => {
                   {store.name}
                 </Typography>
                 <View style={[styles.statusPill, paused ? styles.statusPaused : styles.statusOpen]}>
-                  <View style={[styles.statusDot, { backgroundColor: paused ? theme.colors.yellow600 : theme.colors.green500 }]} />
+                  <View
+                    style={[
+                      styles.statusDot,
+                      { backgroundColor: paused ? theme.colors.yellow600 : theme.colors.green500 },
+                    ]}
+                  />
                   <Typography mode="caption2" color={paused ? 'yellow900' : 'green900'}>
                     {paused ? '일시중지' : '영업중'}
                   </Typography>
@@ -171,8 +198,16 @@ const StoreScreen = () => {
           )}
           <View style={styles.chips}>
             <Chip icon="cash" label={`최소주문 ${won(store.minOrderAmount)}`} />
-            <Chip icon="moped-outline" label={store.deliveryEnabled ? `배달비 ${won(store.deliveryFee)}` : '배달 중단'} off={!store.deliveryEnabled} />
-            <Chip icon="shopping-outline" label={store.pickupEnabled ? '포장 가능' : '포장 중단'} off={!store.pickupEnabled} />
+            <Chip
+              icon="moped-outline"
+              label={store.deliveryEnabled ? `배달비 ${won(store.deliveryFee)}` : '배달 중단'}
+              off={!store.deliveryEnabled}
+            />
+            <Chip
+              icon="shopping-outline"
+              label={store.pickupEnabled ? '포장 가능' : '포장 중단'}
+              off={!store.pickupEnabled}
+            />
           </View>
         </View>
 
@@ -182,9 +217,19 @@ const StoreScreen = () => {
             가게 운영
           </Typography>
           <View style={styles.menuCard}>
-            <MenuRow icon="store-edit-outline" label="가게 정보 관리" desc="소개, 원산지, 최소주문금액, 배달비" onPress={() => navigation.navigate('StoreInfoEdit')} />
+            <MenuRow
+              icon="store-edit-outline"
+              label="가게 정보 관리"
+              desc="소개, 원산지, 최소주문금액, 배달비"
+              onPress={() => navigation.navigate('StoreInfoEdit')}
+            />
             <View style={styles.sep} />
-            <MenuRow icon="clock-outline" label="영업시간 설정" desc="요일별 영업·휴게 시간" onPress={() => navigation.navigate('StoreHours')} />
+            <MenuRow
+              icon="clock-outline"
+              label="영업시간 설정"
+              desc="요일별 영업·휴게 시간"
+              onPress={() => navigation.navigate('StoreHours')}
+            />
             <View style={styles.sep} />
             <MenuRow
               icon="tune-variant"
@@ -195,7 +240,12 @@ const StoreScreen = () => {
             <View style={styles.sep} />
             <MenuRow icon="cash-multiple" label="정산 내역" onPress={() => navigation.navigate('Settlement')} />
             <View style={styles.sep} />
-            <MenuRow icon="bullhorn-outline" label="공지사항" desc="운영사 안내 · 점검 · 이벤트" onPress={() => navigation.navigate('Notice')} />
+            <MenuRow
+              icon="bullhorn-outline"
+              label="공지사항"
+              desc="운영사 안내 · 점검 · 이벤트"
+              onPress={() => navigation.navigate('Notice')}
+            />
             <View style={styles.sep} />
             <View style={styles.menuRow}>
               <MaterialCommunityIcons name="volume-high" size={22} color={theme.colors.gray700} />
@@ -232,7 +282,7 @@ const StoreScreen = () => {
               <Row label="계좌번호" value={store.accountNo} />
               <Row label="예금주" value={store.accountHolder} />
               <Row label="플랫폼 수수료" value={`${store.feeRate}% (VAT 별도)`} />
-              <Row label="정산 주기" value="매출 발생일 기준 D+2 영업일" />
+              <Row label="정산 주기" value="주문 완료일 기준 2일 뒤 입금" />
             </View>
           </CollapsibleSection>
 
@@ -260,29 +310,78 @@ const styles = StyleSheet.create({
   blob1: { width: 220, height: 220, top: -120, right: -50, opacity: 0.35 },
   blob2: { width: 120, height: 120, bottom: -60, left: 24, opacity: 0.2 },
   // 프로필 카드: 배너 위로 올라타고, 사진은 카드 위 가장자리 밖으로 반쯤 나간다
-  profileCard: { marginHorizontal: 16, marginTop: -28, backgroundColor: theme.colors.white, borderRadius: theme.radius.lg, padding: 16, paddingTop: 0, boxShadow: theme.shadow.card },
+  profileCard: {
+    marginHorizontal: 16,
+    marginTop: -28,
+    backgroundColor: theme.colors.white,
+    borderRadius: theme.radius.lg,
+    padding: 16,
+    paddingTop: 0,
+    boxShadow: theme.shadow.card,
+  },
   // 사진은 위 끝에 고정해 띠에 걸치는 정도(30)를 유지하고, 글은 카드 안쪽 여백(16)에서 시작한다. 카드 아래 여백과 같은 값
   profileTop: { flexDirection: 'row', alignItems: 'flex-start', gap: 12 },
-  avatar: { width: 76, height: 76, borderRadius: 22, marginTop: -30, borderWidth: 3, borderColor: theme.colors.white, backgroundColor: theme.colors.white },
+  avatar: {
+    width: 76,
+    height: 76,
+    borderRadius: 22,
+    marginTop: -30,
+    borderWidth: 3,
+    borderColor: theme.colors.white,
+    backgroundColor: theme.colors.white,
+  },
   avatarEmpty: { backgroundColor: theme.colors.orange50, alignItems: 'center', justifyContent: 'center' },
   profileName: { flex: 1, gap: 2, paddingTop: 16 },
   nameRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  statusPill: { flexDirection: 'row', alignItems: 'center', gap: 5, paddingHorizontal: 8, height: 22, borderRadius: theme.radius.pill },
+  statusPill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+    paddingHorizontal: 8,
+    height: 22,
+    borderRadius: theme.radius.pill,
+  },
   statusOpen: { backgroundColor: theme.colors.green50 },
   statusPaused: { backgroundColor: theme.colors.yellow50 },
   statusDot: { width: 6, height: 6, borderRadius: 3 },
   chips: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 14 },
-  chip: { flexDirection: 'row', alignItems: 'center', gap: 5, paddingHorizontal: 10, height: 28, borderRadius: theme.radius.pill, backgroundColor: theme.colors.orange50 },
+  chip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+    paddingHorizontal: 10,
+    height: 28,
+    borderRadius: theme.radius.pill,
+    backgroundColor: theme.colors.orange50,
+  },
   chipOff: { backgroundColor: theme.colors.gray100 },
   // 본문
   body: { padding: 16, gap: 12 },
   sectionTitle: { marginTop: 4, marginLeft: 4, marginBottom: -4 },
   // 메뉴 줄마다 위아래 여백(12)이 있으므로 카드의 위아래 여백은 뺀다. 줄은 좌우로 카드 끝까지 닿는다
-  menuCard: { backgroundColor: theme.colors.white, borderRadius: theme.radius.lg, paddingHorizontal: 16, boxShadow: theme.shadow.card, overflow: 'hidden' },
-  menuRow: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingVertical: 12, marginHorizontal: -16, paddingHorizontal: 16 },
+  menuCard: {
+    backgroundColor: theme.colors.white,
+    borderRadius: theme.radius.lg,
+    paddingHorizontal: 16,
+    boxShadow: theme.shadow.card,
+    overflow: 'hidden',
+  },
+  menuRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    paddingVertical: 12,
+    marginHorizontal: -16,
+    paddingHorizontal: 16,
+  },
   sep: { height: 1, backgroundColor: theme.colors.gray100 },
   // 접힌 참고 정보: 그림자 없이 납작하게, 테두리로만 구분
-  collapsible: { backgroundColor: theme.colors.gray100, borderRadius: theme.radius.lg, borderWidth: 1, borderColor: theme.colors.line },
+  collapsible: {
+    backgroundColor: theme.colors.gray100,
+    borderRadius: theme.radius.lg,
+    borderWidth: 1,
+    borderColor: theme.colors.line,
+  },
   collapsibleHead: { flexDirection: 'row', alignItems: 'center', gap: 12, padding: 16 },
   collapsibleBody: { paddingHorizontal: 16, paddingBottom: 16 },
   infoTitle: { marginBottom: 8 },

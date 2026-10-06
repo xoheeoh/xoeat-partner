@@ -16,7 +16,11 @@ interface AdultBadgeProps {
 const AdultBadge: React.FC<AdultBadgeProps> = ({ size = 20, style }) => (
   <View
     accessibilityLabel="미성년자 구매 불가"
-    style={[styles.circle, { width: size, height: size, borderRadius: size / 2, borderWidth: Math.max(2, size * 0.12) }, style]}>
+    style={[
+      styles.circle,
+      { width: size, height: size, borderRadius: size / 2, borderWidth: Math.max(2, size * 0.12) },
+      style,
+    ]}>
     <Text allowFontScaling={false} style={[styles.text, { fontSize: size * 0.5, lineHeight: size * 0.9 }]}>
       19
     </Text>
@@ -24,7 +28,12 @@ const AdultBadge: React.FC<AdultBadgeProps> = ({ size = 20, style }) => (
 );
 
 const styles = StyleSheet.create({
-  circle: { borderColor: theme.colors.red600, backgroundColor: 'transparent', alignItems: 'center', justifyContent: 'center' },
+  circle: {
+    borderColor: theme.colors.red600,
+    backgroundColor: 'transparent',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   text: { fontFamily: 'Pretendard-Bold', color: theme.colors.red600, letterSpacing: -0.6, textAlign: 'center' },
 });
 

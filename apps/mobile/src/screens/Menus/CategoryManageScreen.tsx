@@ -10,7 +10,19 @@ import { isOk } from '@apis/client';
 import { useStore } from '@contexts/StoreContext';
 import { useDialog } from '@contexts/DialogContext';
 import { loadingController } from '@utils/loadingController';
-import { Badge, BOTTOM_BTN_BOX_HEIGHT, BottomBtnBox, BottomSheet, InfoBox, KeyboardAwareScrollView, PrimaryButton, ScreenWrapper, SortableList, TextField, Typography } from '@components/common';
+import {
+  Badge,
+  BOTTOM_BTN_BOX_HEIGHT,
+  BottomBtnBox,
+  BottomSheet,
+  InfoBox,
+  KeyboardAwareScrollView,
+  PrimaryButton,
+  ScreenWrapper,
+  SortableList,
+  TextField,
+  Typography,
+} from '@components/common';
 import { theme } from '@styles';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'CategoryManage'>;
@@ -36,7 +48,11 @@ const CategoryManageScreen: React.FC<Props> = ({ navigation }) => {
 
   useEffect(() => {
     getCategories().then((res) => {
-      const list = (isOk(res) && res.categories ? res.categories : []).map((c) => ({ id: c.id, name: c.name, key: c.id }));
+      const list = (isOk(res) && res.categories ? res.categories : []).map((c) => ({
+        id: c.id,
+        name: c.name,
+        key: c.id,
+      }));
       setItems(list);
       setOriginal(JSON.stringify(list));
     });
@@ -93,10 +109,15 @@ const CategoryManageScreen: React.FC<Props> = ({ navigation }) => {
 
   return (
     <ScreenWrapper backgroundColor="white" keyboardBottomInset={BOTTOM_BTN_BOX_HEIGHT}>
-      <KeyboardAwareScrollView contentContainerStyle={styles.container} keyboardAccessoryHeight={BOTTOM_BTN_BOX_HEIGHT} scrollEnabled={!dragging}>
-        <InfoBox>고객 앱의 메뉴판은 이 순서대로 보여요. 왼쪽 손잡이를 잡고 끌어 순서를 바꾸고 저장을 눌러 주세요.</InfoBox>
+      <KeyboardAwareScrollView
+        contentContainerStyle={styles.container}
+        keyboardAccessoryHeight={BOTTOM_BTN_BOX_HEIGHT}
+        scrollEnabled={!dragging}>
+        <InfoBox>
+          고객 앱의 메뉴판은 이 순서대로 보여요. 왼쪽 손잡이를 잡고 끌어 순서를 바꾸고 저장을 눌러 주세요.
+        </InfoBox>
 
-        <View style={styles.list}>
+        <View>
           <SortableList
             data={items}
             keyOf={(it) => it.key}
@@ -129,7 +150,12 @@ const CategoryManageScreen: React.FC<Props> = ({ navigation }) => {
           )}
         </View>
 
-        <PrimaryButton label="+ 카테고리 추가" size="md" buttonColor={theme.colors.white} onPress={() => setEditing({ index: null, name: '' })} />
+        <PrimaryButton
+          label="+ 카테고리 추가"
+          size="md"
+          buttonColor={theme.colors.white}
+          onPress={() => setEditing({ index: null, name: '' })}
+        />
       </KeyboardAwareScrollView>
 
       <BottomBtnBox label="저장" onPress={save} disabled={!dirty || saving} />
@@ -141,7 +167,15 @@ const CategoryManageScreen: React.FC<Props> = ({ navigation }) => {
         content={
           editing && (
             <View style={{ gap: 12 }}>
-              <TextField id="categoryName" inputMode="text" label="카테고리명" placeholder="예) 대표 메뉴" value={editing.name} onChangeText={(v) => setEditing({ ...editing, name: v })} maxLength={30} />
+              <TextField
+                id="categoryName"
+                inputMode="text"
+                label="카테고리명"
+                placeholder="예) 대표 메뉴"
+                value={editing.name}
+                onChangeText={(v) => setEditing({ ...editing, name: v })}
+                maxLength={30}
+              />
               <PrimaryButton label="확인" onPress={commitEdit} disabled={!editing.name.trim()} />
             </View>
           )
@@ -153,9 +187,15 @@ const CategoryManageScreen: React.FC<Props> = ({ navigation }) => {
 
 const styles = StyleSheet.create({
   container: { padding: 20, paddingTop: 0, gap: 16 },
-  list: {},
   // 줄 높이는 SortableList 가 ROW_HEIGHT 로 고정한다. 여기서는 가로 배치와 구분선만
-  row: { flex: 1, flexDirection: 'row', alignItems: 'center', gap: 4, borderBottomWidth: 1, borderBottomColor: theme.colors.gray100 },
+  row: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    borderBottomWidth: 1,
+    borderBottomColor: theme.colors.gray100,
+  },
   nameArea: { flex: 1, flexDirection: 'row', alignItems: 'center', gap: 8 },
   iconBtn: { width: 36, height: 36, alignItems: 'center', justifyContent: 'center' },
 });

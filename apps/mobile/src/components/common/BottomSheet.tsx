@@ -14,7 +14,7 @@ import { WEB_MAX_WIDTH } from '@utils/dimensions';
 import { IconButton } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import Typography from './Typography';
+import { Typography } from './Typography';
 import { theme } from '@styles';
 
 // 핸들·헤더를 잡고 끌어내려서 시트를 닫는 기준값
@@ -72,15 +72,15 @@ function useDragToClose(panY: Animated.Value, snapBack: Animated.CompositeAnimat
   return panResponder.panHandlers;
 }
 
-interface SimpleBottomSheetProps {
+interface BottomSheetProps {
   visible: boolean;
   setVisible: (visible: boolean) => void;
   title: string;
   content: ReactNode;
 }
 
-// 기본 BottomSheet. 내용이 짧으면 내용 높이만큼, 길면 화면의 SHEET_MAX_HEIGHT 까지 커지고 그 안에서 스크롤된다
-const SimpleBottomSheet: React.FC<SimpleBottomSheetProps> = ({ visible, setVisible, title, content }) => {
+// 내용이 짧으면 내용 높이만큼, 길면 화면의 SHEET_MAX_HEIGHT 까지 커지고 그 안에서 스크롤된다
+const BottomSheet: React.FC<BottomSheetProps> = ({ visible, setVisible, title, content }) => {
   const screenHeight = Dimensions.get('screen').height;
   const panY = useRef(new Animated.Value(screenHeight)).current;
   const insets = useSafeAreaInsets();
@@ -199,8 +199,5 @@ const styles = StyleSheet.create({
   content: { paddingHorizontal: 20 },
 });
 
-export default SimpleBottomSheet;
-export { SimpleBottomSheet };
-
-/** 호환용 별칭 */
-export const BottomSheet = SimpleBottomSheet;
+export default BottomSheet;
+export { BottomSheet };

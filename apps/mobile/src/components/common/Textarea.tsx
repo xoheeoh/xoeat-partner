@@ -2,8 +2,7 @@ import { useState } from 'react';
 import { StyleSheet, TextInput, View } from 'react-native';
 import { theme } from '@styles';
 
-import Typography from './Typography';
-import { typographyStyles } from './Typography';
+import { Typography, typographyStyles } from './Typography';
 import { useNotifyInputFocus } from './KeyboardAwareScrollView';
 
 interface TextareaProps {

@@ -6,7 +6,7 @@ import { ago, timeOnly, won } from '@utils/formatter';
 import type { Order } from '@typ/domain';
 import { Badge, Typography } from '@components/common';
 import { theme } from '@styles';
-import OrderActions from './OrderActions';
+import { OrderActions } from './OrderActions';
 
 interface OrderCardProps {
   order: Order;
@@ -69,11 +69,15 @@ const OrderCard: React.FC<OrderCardProps> = ({ order, onPress, onChanged, readon
         </View>
       </Pressable>
 
-      {!readonly && (order.status === 'PENDING' || order.status === 'ACCEPTED' || order.status === 'READY' || order.status === 'DELIVERING') && (
-        <View style={styles.actions}>
-          <OrderActions order={order} onChanged={onChanged} size="md" />
-        </View>
-      )}
+      {!readonly &&
+        (order.status === 'PENDING' ||
+          order.status === 'ACCEPTED' ||
+          order.status === 'READY' ||
+          order.status === 'DELIVERING') && (
+          <View style={styles.actions}>
+            <OrderActions order={order} onChanged={onChanged} size="md" />
+          </View>
+        )}
       {(order.status === 'REJECTED' || order.status === 'CANCELED') && !!order.rejectReason && (
         <Typography mode="caption1" color="red600" style={{ marginTop: 10 }}>
           사유: {order.rejectReason}

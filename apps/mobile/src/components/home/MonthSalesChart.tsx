@@ -27,10 +27,12 @@ export const groupByWeek = (days: DailySales[]): Bucket[] => {
 
   return WEEK_STARTS.map((start, i) => {
     const end = i === WEEK_STARTS.length - 1 ? lastDate : WEEK_STARTS[i + 1] - 1;
-    const sales = days.filter((d) => {
-      const n = new Date(`${d.date}T00:00:00`).getDate();
-      return n >= start && n <= end;
-    }).reduce((sum, d) => sum + d.sales, 0);
+    const sales = days
+      .filter((d) => {
+        const n = new Date(`${d.date}T00:00:00`).getDate();
+        return n >= start && n <= end;
+      })
+      .reduce((sum, d) => sum + d.sales, 0);
     const state = todayDate < start ? 'future' : todayDate > end ? 'past' : 'current';
     return { label: `${start}~${end}일`, sales, state };
   });
@@ -46,7 +48,9 @@ const MonthSalesChart: React.FC<MonthSalesChartProps> = ({ days }) => {
       {buckets.map((b) => {
         const isCurrent = b.state === 'current';
         const isFuture = b.state === 'future';
-        const h = isFuture ? BAR_AREA_HEIGHT * 0.35 : Math.max(b.sales > 0 ? 4 : 2, Math.round((b.sales / max) * BAR_AREA_HEIGHT));
+        const h = isFuture
+          ? BAR_AREA_HEIGHT * 0.35
+          : Math.max(b.sales > 0 ? 4 : 2, Math.round((b.sales / max) * BAR_AREA_HEIGHT));
         return (
           <View key={b.label} style={styles.col}>
             <Typography mode="caption2" color={isCurrent ? 'orange700' : 'gray400'} style={{ marginBottom: 4 }}>
@@ -57,11 +61,16 @@ const MonthSalesChart: React.FC<MonthSalesChartProps> = ({ days }) => {
                 style={[
                   styles.bar,
                   { height: h },
-                  isFuture ? styles.barFuture : { backgroundColor: isCurrent ? theme.colors.primary : theme.colors.orange200 },
+                  isFuture
+                    ? styles.barFuture
+                    : { backgroundColor: isCurrent ? theme.colors.primary : theme.colors.orange200 },
                 ]}
               />
             </View>
-            <Typography mode="caption2" color={isCurrent ? 'orange700' : isFuture ? 'gray300' : 'gray500'} style={{ marginTop: 6 }}>
+            <Typography
+              mode="caption2"
+              color={isCurrent ? 'orange700' : isFuture ? 'gray300' : 'gray500'}
+              style={{ marginTop: 6 }}>
               {b.label}
             </Typography>
           </View>
@@ -76,7 +85,12 @@ const styles = StyleSheet.create({
   col: { flex: 1, alignItems: 'center' },
   barTrack: { width: '100%', justifyContent: 'flex-end', alignItems: 'center' },
   bar: { width: '60%', maxWidth: 40, borderRadius: 6 },
-  barFuture: { borderWidth: 1, borderStyle: 'dashed', borderColor: theme.colors.gray200, backgroundColor: 'transparent' },
+  barFuture: {
+    borderWidth: 1,
+    borderStyle: 'dashed',
+    borderColor: theme.colors.gray200,
+    backgroundColor: 'transparent',
+  },
 });
 
 export default MonthSalesChart;

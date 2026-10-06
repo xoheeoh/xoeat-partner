@@ -1,6 +1,6 @@
 import { Pressable, StyleSheet, ViewStyle } from 'react-native';
 
-import Typography from './Typography';
+import { Typography } from './Typography';
 import { controlSize, ControlSize } from '@styles';
 
 interface TextButtonProps {

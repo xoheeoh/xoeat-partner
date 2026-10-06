@@ -4,8 +4,8 @@ import { Icon } from 'react-native-paper';
 import { theme } from '@styles';
 
 /**
- * 상단 바(헤더, 대시보드 내비)에 놓이는 둥근 회색 아이콘 버튼.
- * 햄버거(menu)와 닫기(close) 버튼이 같은 위치·모양이 되도록 크기를 한곳에서 정한다.
+ * 상단 바(Header)에 놓이는 둥근 회색 아이콘 버튼.
+ * 홈의 알림 종과 닫기 버튼이 같은 위치·모양이 되도록 크기를 한곳에서 정한다.
  */
 export const NAV_ICON_BUTTON_SIZE = 40;
 

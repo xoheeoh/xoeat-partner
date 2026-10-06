@@ -55,7 +55,10 @@ export const COOKING_MINUTES = [
 export const DAY_LABELS = ['월', '화', '수', '목', '금', '토', '일'];
 
 /** 영업시간 선택지: 00:00 ~ 23:30, 30분 간격 */
-export const TIME_OPTIONS = Array.from({ length: 48 }, (_, i) => `${String(Math.floor(i / 2)).padStart(2, '0')}:${i % 2 ? '30' : '00'}`);
+export const TIME_OPTIONS = Array.from(
+  { length: 48 },
+  (_, i) => `${String(Math.floor(i / 2)).padStart(2, '0')}:${i % 2 ? '30' : '00'}`,
+);
 
 export const NOTICE_KIND: Record<string, { label: string; tone: BadgeTone }> = {
   NEWS: { label: '소식', tone: 'gray' },

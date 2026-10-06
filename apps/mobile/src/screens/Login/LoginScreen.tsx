@@ -9,8 +9,15 @@ import { login } from '@apis/storeApi';
 import { isOk } from '@apis/client';
 import { loadingController } from '@utils/loadingController';
 import { goToMain } from '@utils/navigationHelpers';
-import { CheckBox, InfoBox, KeyboardAwareScrollView, PrimaryButton, ScreenWrapper, TextField, Typography } from '@components/common';
-import { theme } from '@styles';
+import {
+  CheckBox,
+  InfoBox,
+  KeyboardAwareScrollView,
+  PrimaryButton,
+  ScreenWrapper,
+  TextField,
+  Typography,
+} from '@components/common';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Login'>;
 
@@ -99,8 +106,14 @@ const LoginScreen: React.FC<Props> = ({ navigation }) => {
 
         <InfoBox icon="account-key-outline" style={{ marginTop: 32 }}>
           <Typography mode="caption1" color="gray600">
-            데모 계정{'\n'}아이디 <Typography mode="subtitle4" color="gray900">owner01</Typography> · 비밀번호{' '}
-            <Typography mode="subtitle4" color="gray900">demo1234!</Typography>
+            데모 계정{'\n'}아이디{' '}
+            <Typography mode="subtitle4" color="gray900">
+              owner01
+            </Typography>{' '}
+            · 비밀번호{' '}
+            <Typography mode="subtitle4" color="gray900">
+              demo1234!
+            </Typography>
             {'\n'}가맹점 계정은 플랫폼이 발급하므로 회원가입 화면은 없습니다.
           </Typography>
         </InfoBox>
@@ -114,7 +127,6 @@ const styles = StyleSheet.create({
   brand: { alignItems: 'center', gap: 6, marginBottom: 40 },
   logo: { width: 72, height: 72, borderRadius: 18, marginBottom: 10 },
   form: { gap: 16 },
-  demo: { backgroundColor: theme.colors.gray50 },
 });
 
 export default LoginScreen;

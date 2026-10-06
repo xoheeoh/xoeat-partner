@@ -182,7 +182,12 @@ export const getSettlements = (month: string) =>
     const next = new Date(y, m, 1); // 다음 달 1일
     const to = `${next.getFullYear()}-${String(next.getMonth() + 1).padStart(2, '0')}-01`;
     const rows = unwrap(
-      await supabase.from('settlements').select('*').gte('settle_date', from).lt('settle_date', to).order('settle_date', { ascending: false }),
+      await supabase
+        .from('settlements')
+        .select('*')
+        .gte('settle_date', from)
+        .lt('settle_date', to)
+        .order('settle_date', { ascending: false }),
     ) as SettlementRow[];
     const settlements: Settlement[] = rows.map((r) => ({
       settleDate: r.settle_date,
@@ -207,6 +212,12 @@ export const getNotices = () =>
       body: string;
       created_at: string;
     }[];
-    const notices: Notice[] = rows.map((r) => ({ id: r.id, kind: r.kind, title: r.title, body: r.body, createdAt: r.created_at }));
+    const notices: Notice[] = rows.map((r) => ({
+      id: r.id,
+      kind: r.kind,
+      title: r.title,
+      body: r.body,
+      createdAt: r.created_at,
+    }));
     return { notices };
   });

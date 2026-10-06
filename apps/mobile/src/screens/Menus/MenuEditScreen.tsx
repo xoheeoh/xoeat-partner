@@ -113,7 +113,12 @@ const MenuEditScreen: React.FC<Props> = ({ navigation, route }) => {
       await alert({ title: '사진 권한', message1: '메뉴 사진을 고르려면 사진 보관함 접근 권한이 필요해요.' });
       return;
     }
-    const result = await ImagePicker.launchImageLibraryAsync({ mediaTypes: ['images'], allowsEditing: true, aspect: [1, 1], quality: 0.8 });
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ['images'],
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 0.8,
+    });
     if (result.canceled || !result.assets[0]) return;
     const asset = result.assets[0];
     setUploading(true);
@@ -141,11 +146,16 @@ const MenuEditScreen: React.FC<Props> = ({ navigation, route }) => {
     navigation.goBack();
   };
 
-  const categoryNames = ['카테고리 없음', ...categories.map((c) => c.name)];
-  const selectedCategoryName = categories.find((c) => c.id === form.categoryId)?.name ?? '카테고리 없음';
+  const categoryNames = ['미분류', ...categories.map((c) => c.name)];
+  const selectedCategoryName = categories.find((c) => c.id === form.categoryId)?.name ?? '미분류';
   const selectedGroups = groups.filter((g) => form.optionGroupIds.includes(g.id));
 
-  if (!loaded) return <ScreenWrapper backgroundColor="white"><View /></ScreenWrapper>;
+  if (!loaded)
+    return (
+      <ScreenWrapper backgroundColor="white">
+        <View />
+      </ScreenWrapper>
+    );
 
   return (
     <ScreenWrapper backgroundColor="white" keyboardBottomInset={BOTTOM_BTN_BOX_HEIGHT}>
@@ -166,7 +176,7 @@ const MenuEditScreen: React.FC<Props> = ({ navigation, route }) => {
           </Pressable>
           <View style={{ flex: 1, gap: 8 }}>
             <Typography mode="caption1" color="gray500">
-              정사각형으로 잘려 고객 앱 메뉴 목록에 보여요. 5MB 이하 JPG·PNG.
+              정사각형으로 잘려 고객 앱 메뉴 목록에 보여요. JPG·PNG·WEBP.
             </Typography>
             {!!form.imageUrl && (
               <Pressable onPress={() => set('imageUrl', null)}>
@@ -178,7 +188,15 @@ const MenuEditScreen: React.FC<Props> = ({ navigation, route }) => {
           </View>
         </View>
 
-        <TextField id="name" inputMode="text" label="메뉴명 *" placeholder="예) 소반 김치찌개" value={form.name} onChangeText={(v) => set('name', v)} maxLength={60} />
+        <TextField
+          id="name"
+          inputMode="text"
+          label="메뉴명 *"
+          placeholder="예) 소반 김치찌개"
+          value={form.name}
+          onChangeText={(v) => set('name', v)}
+          maxLength={60}
+        />
 
         <View>
           <Label text="카테고리" />
@@ -206,7 +224,15 @@ const MenuEditScreen: React.FC<Props> = ({ navigation, route }) => {
             />
           </View>
           <View style={{ flex: 1 }}>
-            <TextField id="standard" inputMode="text" label="규격" placeholder="예) 1인분, 600ml" value={form.standard} onChangeText={(v) => set('standard', v)} maxLength={20} />
+            <TextField
+              id="standard"
+              inputMode="text"
+              label="규격"
+              placeholder="예) 1인분, 600ml"
+              value={form.standard}
+              onChangeText={(v) => set('standard', v)}
+              maxLength={20}
+            />
           </View>
         </View>
 
@@ -219,7 +245,10 @@ const MenuEditScreen: React.FC<Props> = ({ navigation, route }) => {
           <Label text="판매 상태" />
           <View style={styles.statusRow}>
             {(Object.keys(SALE_STATUS) as SaleStatus[]).map((s) => (
-              <Pressable key={s} onPress={() => set('saleStatus', s)} style={[styles.statusChip, form.saleStatus === s && styles.statusChipActive]}>
+              <Pressable
+                key={s}
+                onPress={() => set('saleStatus', s)}
+                style={[styles.statusChip, form.saleStatus === s && styles.statusChipActive]}>
                 <Typography mode="subtitle3" color={form.saleStatus === s ? 'orange700' : 'gray600'}>
                   {SALE_STATUS[s].label}
                 </Typography>
@@ -264,7 +293,14 @@ const MenuEditScreen: React.FC<Props> = ({ navigation, route }) => {
                       {g.options.map((o) => `${o.name}${o.price ? ` +${won(o.price)}` : ''}`).join(', ')}
                     </Typography>
                   </View>
-                  <Pressable onPress={() => set('optionGroupIds', form.optionGroupIds.filter((id) => id !== g.id))} hitSlop={8}>
+                  <Pressable
+                    onPress={() =>
+                      set(
+                        'optionGroupIds',
+                        form.optionGroupIds.filter((id) => id !== g.id),
+                      )
+                    }
+                    hitSlop={8}>
                     <MaterialCommunityIcons name="close" size={18} color={theme.colors.gray400} />
                   </Pressable>
                 </View>
@@ -334,18 +370,49 @@ const MenuEditScreen: React.FC<Props> = ({ navigation, route }) => {
 const styles = StyleSheet.create({
   container: { padding: 20, gap: 20 },
   imageRow: { flexDirection: 'row', gap: 14, alignItems: 'center' },
-  imageBox: { width: 96, height: 96, borderRadius: theme.radius.md, overflow: 'hidden', backgroundColor: theme.colors.gray50, borderWidth: 1, borderColor: theme.colors.line },
+  imageBox: {
+    width: 96,
+    height: 96,
+    borderRadius: theme.radius.md,
+    overflow: 'hidden',
+    backgroundColor: theme.colors.gray50,
+    borderWidth: 1,
+    borderColor: theme.colors.line,
+  },
   image: { width: '100%', height: '100%' },
   imageEmpty: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 4 },
   twoCol: { flexDirection: 'row', gap: 12 },
   statusRow: { flexDirection: 'row', gap: 8 },
-  statusChip: { flex: 1, height: 44, borderRadius: theme.radius.sm, borderWidth: 1, borderColor: theme.colors.line, alignItems: 'center', justifyContent: 'center' },
+  statusChip: {
+    flex: 1,
+    height: 44,
+    borderRadius: theme.radius.sm,
+    borderWidth: 1,
+    borderColor: theme.colors.line,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   statusChipActive: { borderColor: theme.colors.primary, backgroundColor: theme.colors.orange50 },
   rowBetween: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' },
   linkBtn: { flexDirection: 'row', alignItems: 'center' },
-  groupCard: { flexDirection: 'row', alignItems: 'center', gap: 12, padding: 12, borderRadius: theme.radius.md, borderWidth: 1, borderColor: theme.colors.line },
+  groupCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    padding: 12,
+    borderRadius: theme.radius.md,
+    borderWidth: 1,
+    borderColor: theme.colors.line,
+  },
   groupCardOn: { borderColor: theme.colors.primary, backgroundColor: theme.colors.orange50 },
-  groupEmpty: { padding: 14, borderRadius: theme.radius.md, backgroundColor: theme.colors.gray50, borderWidth: 1, borderStyle: 'dashed', borderColor: theme.colors.line },
+  groupEmpty: {
+    padding: 14,
+    borderRadius: theme.radius.md,
+    backgroundColor: theme.colors.gray50,
+    borderWidth: 1,
+    borderStyle: 'dashed',
+    borderColor: theme.colors.line,
+  },
 });
 
 export default MenuEditScreen;

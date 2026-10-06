@@ -13,7 +13,10 @@ export const phone = (s: string) => {
   if (s.includes('-')) return s;
   const d = s.replace(/\D/g, '');
   if (d.length === 11) return `${d.slice(0, 3)}-${d.slice(3, 7)}-${d.slice(7)}`;
-  if (d.length === 10) return d.startsWith('02') ? `${d.slice(0, 2)}-${d.slice(2, 6)}-${d.slice(6)}` : `${d.slice(0, 3)}-${d.slice(3, 6)}-${d.slice(6)}`;
+  if (d.length === 10)
+    return d.startsWith('02')
+      ? `${d.slice(0, 2)}-${d.slice(2, 6)}-${d.slice(6)}`
+      : `${d.slice(0, 3)}-${d.slice(3, 6)}-${d.slice(6)}`;
   return s;
 };
 
@@ -57,7 +60,8 @@ export const dateKo = (ymd: string) => {
 export const todayKoShort = (d = new Date()) => `${d.getMonth() + 1}월 ${d.getDate()}일 (${DAY_KO[d.getDay()]})`;
 
 /** Date → "2026년 10월 1일 목요일" */
-export const todayKo = (d = new Date()) => `${d.getFullYear()}년 ${d.getMonth() + 1}월 ${d.getDate()}일 ${DAY_KO[d.getDay()]}요일`;
+export const todayKo = (d = new Date()) =>
+  `${d.getFullYear()}년 ${d.getMonth() + 1}월 ${d.getDate()}일 ${DAY_KO[d.getDay()]}요일`;
 
 /** ISO → "3분 전", "1시간 전" (주문 목록의 경과 시간) */
 export const ago = (iso: string) => {
@@ -68,12 +72,4 @@ export const ago = (iso: string) => {
   const h = Math.floor(m / 60);
   if (h < 24) return `${h}시간 전`;
   return `${Math.floor(h / 24)}일 전`;
-};
-
-/** "HH:mm" → "오전 10:00" */
-export const timeKo = (hhmm: string) => {
-  const [h, m] = hhmm.split(':').map(Number);
-  const ampm = h < 12 ? '오전' : '오후';
-  const hh = h % 12 === 0 ? 12 : h % 12;
-  return `${ampm} ${hh}:${pad(m)}`;
 };

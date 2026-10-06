@@ -13,7 +13,6 @@ export * from './NavIconButton';
 export * from './BottomSheet';
 export * from './TabBar';
 export * from './Dropdown';
-export * from './SearchBox';
 export * from './Textarea';
 export * from './Radio';
 export * from './Badge';

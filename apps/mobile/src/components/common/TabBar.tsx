@@ -1,5 +1,5 @@
 import { Pressable, StyleSheet, View } from 'react-native';
-import Typography from './Typography';
+import { Typography } from './Typography';
 import { theme } from '@styles';
 
 interface TabBarProps {
