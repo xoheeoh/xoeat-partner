@@ -22,6 +22,7 @@ import {
   CheckBox,
   Dropdown,
   KeyboardAwareScrollView,
+  PrimaryButton,
   ScreenWrapper,
   TextField,
   Textarea,
@@ -62,6 +63,16 @@ const MenuEditScreen: React.FC<Props> = ({ navigation, route }) => {
   const [groups, setGroups] = useState<OptionGroup[]>([]);
   const [loaded, setLoaded] = useState(!menuId);
   const [groupSheet, setGroupSheet] = useState(false);
+  // 시트 안에서 고르는 임시 선택. "N개 선택 완료"를 눌러야 form 에 반영되고, X·끌어내리기로 닫으면 버려진다
+  const [groupDraft, setGroupDraft] = useState<string[]>([]);
+  const openGroupSheet = () => {
+    setGroupDraft(form.optionGroupIds);
+    setGroupSheet(true);
+  };
+  const applyGroupDraft = () => {
+    set('optionGroupIds', groupDraft);
+    setGroupSheet(false);
+  };
   const [uploading, setUploading] = useState(false);
   const [saving, setSaving] = useState(false);
 
@@ -231,7 +242,7 @@ const MenuEditScreen: React.FC<Props> = ({ navigation, route }) => {
         <View>
           <View style={styles.rowBetween}>
             <Label text="옵션 그룹" />
-            <Pressable onPress={() => setGroupSheet(true)} style={styles.linkBtn}>
+            <Pressable onPress={openGroupSheet} style={styles.linkBtn}>
               <Typography mode="subtitle4" color="orange700">
                 연결 관리
               </Typography>
@@ -260,7 +271,7 @@ const MenuEditScreen: React.FC<Props> = ({ navigation, route }) => {
               ))}
             </View>
           ) : (
-            <Pressable onPress={() => setGroupSheet(true)} style={styles.groupEmpty}>
+            <Pressable onPress={openGroupSheet} style={styles.groupEmpty}>
               <Typography mode="body2" color="gray500">
                 연결된 옵션 그룹이 없어요. 맵기·사이즈 같은 선택지를 붙여 보세요.
               </Typography>
@@ -284,12 +295,11 @@ const MenuEditScreen: React.FC<Props> = ({ navigation, route }) => {
               </Typography>
             )}
             {groups.map((g) => {
-              const on = form.optionGroupIds.includes(g.id);
+              const on = groupDraft.includes(g.id);
+              // 상자 어디를 눌러도, 스위치를 직접 눌러도 같은 토글이 일어나야 한다. 스위치가 터치를 먼저 가져가므로 둘 다 연결한다
+              const toggle = () => setGroupDraft(on ? groupDraft.filter((id) => id !== g.id) : [...groupDraft, g.id]);
               return (
-                <Pressable
-                  key={g.id}
-                  onPress={() => set('optionGroupIds', on ? form.optionGroupIds.filter((id) => id !== g.id) : [...form.optionGroupIds, g.id])}
-                  style={[styles.groupCard, on && styles.groupCardOn]}>
+                <Pressable key={g.id} onPress={toggle} style={[styles.groupCard, on && styles.groupCardOn]}>
                   <View style={{ flex: 1, gap: 2 }}>
                     <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
                       <Typography mode="subtitle3" color="gray900">
@@ -301,10 +311,19 @@ const MenuEditScreen: React.FC<Props> = ({ navigation, route }) => {
                       {g.options.map((o) => o.name).join(', ')}
                     </Typography>
                   </View>
-                  <ToggleSwitch value={on} onValueChange={() => {}} />
+                  <ToggleSwitch value={on} onValueChange={toggle} />
                 </Pressable>
               );
             })}
+            {/* 이 버튼을 눌러야 임시 선택이 form 에 반영된다. X·끌어내리기로 닫으면 바뀌지 않는다 */}
+            {groups.length > 0 && (
+              <PrimaryButton
+                label={groupDraft.length > 0 ? `${groupDraft.length}개 선택 완료` : '선택 완료'}
+                size="lg"
+                onPress={applyGroupDraft}
+                style={{ marginTop: 6 }}
+              />
+            )}
           </View>
         }
       />
