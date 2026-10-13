@@ -3,7 +3,7 @@
 `apps/mobile`(사장님 앱)과 [xoeat-customer](https://github.com/xoheeoh/xoeat-customer)(구매자 앱)를 실제로 동작시키기 위한 백엔드 대역입니다.
 두 앱이 같은 프로젝트를 쓰고, 역할은 RLS 로 나뉩니다 — 가게 소유자(`stores.owner_id`)와 회원(`customers.id`).
 
-이 프로젝트는 프론트엔드 포트폴리오이고, 실무에서는 백엔드 팀이 담당하는 부분(DB, 서버 로직)을
+이 프로젝트의 주제는 앱(프론트엔드)이고, 실무에서는 백엔드 팀이 담당하는 부분(DB, 서버 로직)을
 대신할 서버가 필요해 **AI 도구로 생성**했습니다. 앱은 [`docs/api-spec.md`](../docs/api-spec.md) 의
 명세만 보고 연동했으며, 이 폴더의 내부 구현은 프로젝트가 보여주려는 역량 범위에 들어가지 않습니다.
 
@@ -23,6 +23,8 @@ supabase/
     20261002000200_dashboard_month_days.sql  대시보드가 "최근 7일" 대신 "이번 달 1일~오늘" 날짜별 매출을 내려준다
     20261002000300_notice_body_newline.sql   공지 본문에 글자 그대로 들어간 \n 을 줄바꿈으로
     20261002000400_notifications.sql         사장님 알림함 — 테이블 · RLS · 트리거(새 주문/구매자 취소/새 공지) · 읽음 처리 RPC · Realtime
+    20261008000000_delete_my_account.sql     구매자 회원탈퇴 RPC (진행 중 주문이 있으면 거절, 주문 기록은 가게 쪽에 남김)
+    20261008000100_default_fallback.sql      기본 배송지·결제수단 자동 승계 트리거 (기본 줄을 지우면 다음 줄이, 기본이 없을 때 추가하면 그 줄이 기본)
   seed.sql                      공지사항
   config.toml                   로컬 스택 설정 (구매자 회원가입 허용, 이메일 확인 없음)
 scripts/
@@ -36,7 +38,7 @@ scripts/
 | --- | --- | --- |
 | 조회 · 메뉴 CRUD | PostgREST (`/rest/v1/...`) | 가게, 메뉴, 옵션, 주문 목록, 정산 뷰 |
 | 주문 상태 변경 · 집계 | RPC (`/rest/v1/rpc/...`) | `accept_order`, `reject_order`, `advance_order`, `dashboard_summary`, `mark_notifications_read` |
-| 구매자 주문 생성·취소 | RPC | `place_order`, `cancel_my_order` |
+| 구매자 주문 생성·취소 · 회원탈퇴 | RPC | `place_order`, `cancel_my_order`, `delete_my_account` |
 | 새 주문 알림 | Realtime (`/realtime/v1`) | `orders` INSERT/UPDATE, `notifications` INSERT |
 | 이미지 | Storage (`/storage/v1`) | 버킷 `menu-images` |
 
@@ -64,6 +66,8 @@ notifications (가게별 알림함. orders/notices 트리거가 만들고 앱은
 | 이미지는 `menu-images/<store_id>/...` 경로만 쓸 수 있고 읽기는 공개 | `uploadMenuImage` |
 | 구매자는 가게·메뉴를 읽기만 하고(숨김 메뉴 제외), 주문은 `place_order` 가 금액·옵션 규칙을 다시 계산해 만든다 | 구매자 앱 장바구니·결제 |
 | 구매자는 자기 주문만 보고 `PENDING` 일 때만 취소할 수 있다 | 구매자 앱 주문 상세 |
+| 배송지·결제수단이 하나라도 있으면 기본도 하나 있다 (기본을 지우면 가장 먼저 등록한 줄이 기본이 된다) | 구매자 앱 배송지·결제수단 관리가 삭제 뒤 목록을 다시 읽기만 한다 |
+| 회원탈퇴는 진행 중 주문이 없을 때만 (`ACTIVE_ORDER_EXISTS`). 탈퇴해도 가게 쪽 주문·정산 기록은 남는다 | 구매자 앱 내 정보 수정 |
 
 ## 검증
 

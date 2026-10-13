@@ -218,6 +218,8 @@ Realtime 페이로드에는 `order_items` 가 없으므로 상세는 다시 조�
 
 - 로그인 이메일은 `${loginId}@customer.xoeat.app` (사장님은 `@demo.xoeat.app`). 도메인이 달라 같은 아이디가 공존한다.
 - 회원가입: `auth.signUp` 의 `user_metadata = { role: 'customer', login_id, name, phone }`. 트리거 `handle_new_customer` 가 `customers` 행을 만든다.
+- 회원탈퇴: `deleteMyAccount(loginId, password)` — 앱이 비밀번호로 다시 로그인해 본인 확인을 한 뒤 RPC `delete_my_account()` 를 부른다.
+  진행 중 주문(`PENDING`·`ACCEPTED`·`READY`·`DELIVERING`)이 있으면 `ACTIVE_ORDER_EXISTS`. 회원 행과 배송지·결제수단·찜은 지워지고, 주문은 `customer_id` 만 비워 가게 기록으로 남는다.
 
 ### 조회 (`catalogApi`)
 
@@ -231,6 +233,9 @@ Realtime 페이로드에는 `order_items` 가 없으므로 상세는 다시 조�
 | `customers` | 본인 행만 조회, `name`·`phone` 만 수정 |
 | `addresses` | `label`, `road_address`, `detail`, `is_default`. 기본은 회원당 1개 (부분 유니크 인덱스). 기본 지정은 RPC `set_default_address` |
 | `payment_methods` | `brand`, `last4`(4자리), `expiry`(MM/YY), `alias`. 카드번호 전체는 서버에 오지 않는다. 기본 지정은 RPC `set_default_payment_method` |
+
+두 테이블 모두 트리거 `ensure_default_exists` 가 "줄이 하나라도 있으면 기본도 하나 있다"를 보장한다 — 기본 줄을 지우면 가장 먼저 등록한 줄이,
+기본이 없는 상태에서 추가하면 그 줄이 기본이 된다. 앱은 삭제·추가 뒤 목록을 다시 읽기만 하면 된다.
 | `favorites` | `(customer_id, store_id)` |
 
 ### 주문 (`orderApi`)

@@ -32,7 +32,7 @@ src/
     contexts/     StoreContext(내 가게) · OrderFeedContext(Realtime 구독 · 알림음 · 건수) · NotificationContext(알림함 안 읽은 개수 · 구독) · Dialog · Loading · navigation
     data/         constants (상태 라벨/색 · 거절 사유 · 조리시간 · 업종 · 시간 선택지)
     storages/     AsyncStorage + 보안 저장소(expo-secure-store / 웹 localStorage)
-  styles/         colors · theme(radius · space · shadow) · controls(버튼/입력 크기 단계) · layout
+  styles/         colors · theme(radius · space · shadow) · controls(버튼/입력 크기 단계)
   types/          domain(화면이 다루는 모양) · navigation
   utils/          formatter(금액 · 날짜 · 전화번호) · navigationHelpers · loadingController
   shims/          env(EXPO_PUBLIC_*) · linear-gradient
