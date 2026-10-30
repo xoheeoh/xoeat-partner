@@ -1,0 +1,29 @@
+# Supabase 무료 플랜은 API 요청이 일주일간 없으면 프로젝트를 일시정지한다.
+# 구매자 앱(xoeat-customer)과 같은 프로젝트를 쓰므로 이 저장소에서만 3일마다 깨운다.
+# GitHub 예약 실행은 몇 시간 늦어지거나 건너뛸 수 있어 7일보다 넉넉히 잡는다.
+name: Supabase 깨우기
+
+on:
+  schedule:
+    - cron: '0 0 */3 * *' # 3일마다 UTC 자정 (한국 오전 9시)
+  workflow_dispatch: # Actions 탭에서 수동 실행
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 고객 표를 조회한다 (로그인 전에는 빈 결과가 돌아오지만 API 요청 기록은 남는다)
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+        run: |
+          if [ -z "$SUPABASE_URL" ] || [ -z "$SUPABASE_ANON_KEY" ]; then
+            echo "::error::저장소 Secrets 에 SUPABASE_URL 과 SUPABASE_ANON_KEY 를 등록해 주세요."
+            exit 1
+          fi
+          curl --fail --silent --show-error \
+            "$SUPABASE_URL/rest/v1/customers?select=id&limit=1" \
+            -H "apikey: $SUPABASE_ANON_KEY" \
+            -H "Authorization: Bearer $SUPABASE_ANON_KEY"
+          echo
+          echo "요청 성공 — 프로젝트가 활성 상태로 유지됩니다."
