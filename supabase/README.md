@@ -25,6 +25,7 @@ supabase/
     20261002000400_notifications.sql         사장님 알림함 — 테이블 · RLS · 트리거(새 주문/구매자 취소/새 공지) · 읽음 처리 RPC · Realtime
     20261008000000_delete_my_account.sql     구매자 회원탈퇴 RPC (진행 중 주문이 있으면 거절, 주문 기록은 가게 쪽에 남김)
     20261008000100_default_fallback.sql      기본 배송지·결제수단 자동 승계 트리거 (기본 줄을 지우면 다음 줄이, 기본이 없을 때 추가하면 그 줄이 기본)
+    20261124000000_order_amount_before_insert.sql  주문을 처음부터 확정 금액으로 저장 (새 주문 알림이 "0원"으로 나오던 문제)
   seed.sql                      공지사항
   config.toml                   로컬 스택 설정 (구매자 회원가입 허용, 이메일 확인 없음)
 scripts/
