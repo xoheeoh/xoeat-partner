@@ -34,8 +34,26 @@
       "expo-secure-store",
       "expo-font",
       "expo-audio",
-      ["expo-image-picker", { "photosPermission": "메뉴 사진을 등록하기 위해 사진 보관함을 사용합니다." }],
-      ["expo-splash-screen", { "backgroundColor": "#F0501E", "image": "./assets/images/splash-icon.png", "imageWidth": 96 }]
-    ]
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "메뉴 사진을 등록하기 위해 사진 보관함을 사용합니다."
+        }
+      ],
+      [
+        "expo-splash-screen",
+        {
+          "backgroundColor": "#F0501E",
+          "image": "./assets/images/splash-icon.png",
+          "imageWidth": 96
+        }
+      ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "a235a504-672a-4bb2-ad7d-2bc77cf323d5"
+      }
+    },
+    "owner": "xoheeoh"
   }
 }

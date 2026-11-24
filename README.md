@@ -11,7 +11,7 @@
   <img src="docs/screenshots/menus.png" width="180" alt="메뉴 관리">
 </p>
 
-<!-- 배포 후 채우기: 웹 데모 URL -->
+<p align="center"><b>웹 데모</b> — <a href="https://xoeat-partner.expo.app">https://xoeat-partner.expo.app</a></p>
 
 구매자 앱 [xoeat-customer](https://github.com/xoheeoh/xoeat-customer) 와 **같은 Supabase 프로젝트**를 씁니다.
 구매자 앱에서 주문하면 이 앱의 접수대기에 알림음과 함께 뜨고, 여기서 수락·조리·배달 처리를 하면 구매자 앱의 주문 상태가 실시간으로 바뀝니다.
